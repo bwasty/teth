@@ -1,9 +1,9 @@
 workflow "Build" {
   on = "push"
-  resolves = ["Build"]
+  resolves = ["Test"]
 }
 
-action "Build" {
+action "Test" {
   uses = "icepuma/rust-action@master"
   args = "cargo build && cargo clippy -- -Dwarnings && cargo test"
 }
