@@ -19,7 +19,7 @@ impl WorldState {
 pub type Hash = [u8; 32];
 
 /// σ[a]
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct AccountState {
     /// A scalar value equal to the number of transactions sent from this address or, 
     /// in the case of accounts with associated code, the number of contract-creations made by 
@@ -42,12 +42,23 @@ pub struct AccountState {
     pub code_hash: Hash,
 }
 
+impl Default for AccountState {
+    fn default() -> Self {
+        AccountState {
+            nonce: 0,
+            balance: 0,
+            storage_root: keccak256(&[]),
+            code_hash: keccak256(&[]),
+        }
+    }
+}
+
 #[allow(dead_code)]
 impl AccountState {
     /// If the codeHash field is the Keccak-256 hash of the empty string, i.e. σ[a]c = KEC(()), 
     /// then the node represents a simple account, sometimes referred to as a “non-contract” account.
     pub fn has_code(&self) -> bool {
-        self.code_hash == keccak256(&[])
+        self.code_hash != keccak256(&[])
     }
 
     /// An account is empty when it has no code, zero nonce and zero balance:
@@ -74,7 +85,6 @@ mod tests {
         assert!(acc.is_empty());
 
         acc.code_hash = keccak256(&[1, 2, 3]);
-        dbg!(acc.code_hash);
         assert!(acc.has_code());
         assert!(!acc.is_empty());
     }
