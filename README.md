@@ -1,4 +1,5 @@
-# teth - Toy Ethereum Client ![Actions Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/bwasty/teth)
+# teth - Toy Ethereum Client 
+[![Actions Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/bwasty/teth)](https://github.com/bwasty/teth/actions) [![](https://tokei.rs/b1/github/bwasty/teth)](https://github.com/Aaronepower/tokei)
 
 ## Goals
 * implement Ethereum straight from the [Yellow Paper](https://github.com/ethereum/yellowpaper/)
