@@ -2,6 +2,10 @@
 name = "teth"
 version = "0.1.0"
 authors = ["Benjamin Wasty <benny.wasty@gmail.com>"]
+license = "GPL-3.0"
 edition = "2018"
 
 [dependencies]
+rlp = "0.3.0"
+patricia-trie = "0.3.0"
+tiny-keccak = "1.4.2"

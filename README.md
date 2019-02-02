@@ -5,5 +5,5 @@
 * (over)simplify things for a short and understandable implementation
   - compatibility with real Ethereum: maybe later
 
-## Current state:
+## Current state
 Reading the Yellow Paper and stubbing some structs...
