@@ -1,7 +1,7 @@
 //! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/).
 //! Structs, fields and methods are annotated with their formal definition where applicable.
 
-use ethereum_types::{H256, U256};
+use ethereum_types::{Address, H256, U256, Bloom};
 use tiny_keccak::keccak256;
 
 /// σ
@@ -22,8 +22,6 @@ impl WorldState {
         account.is_empty() || !self.accounts.contains(account)
     }
 }
-
-pub type Address = [u8; 20];
 
 /// σ[a]
 #[derive(Debug, PartialEq)]
@@ -137,6 +135,36 @@ impl Transaction {
     pub fn sender(&self) {
         unimplemented!() // TODO!
     }
+}
+
+#[allow(dead_code)]
+struct Block {
+    /// The Keccak 256-bit hash of the parent block’s header, in its entirety; formally H<sub>p</sub>.
+    parent_hash: H256,
+    /// The Keccak 256-bit hash of the ommers list portion of this block; formally H<sub>o</sub>.
+    ommers_hash: H256,
+    /// The 160-bit address to which all fees collected from the successful mining of this block 
+    /// be transferred; formally H<sub>c</sub>.
+    beneficiary: Address,
+    /// The Keccak 256-bit hash of the root node of the state trie, after all transactions are 
+    /// executed and finalisations applied; formally H<sub>r</sub>.
+    state_root: H256,
+    /// The Keccak 256-bit hash of the root node of the trie structure populated with each 
+    /// transaction in the transactions list portion of the block; formally H<sub>t</sub>.
+    transactions_root: H256,
+    /// The Keccak 256-bit hash of the root node of the trie structure populated with the receipts
+    /// of each transaction in the transactions list portion of the block; formally H<sub>e</sub>.
+    receipts_root: H256,
+    /// The Bloom filter composed from indexable information (logger address and log topics) contained 
+    /// in each log entry from the receipt of each transaction in the transactions list; formally H<sub>b</sub>.
+    logs_bloom: Bloom,
+    /// A scalar value equal to the number of ancestor blocks. 
+    /// The genesis block has a number of zero; formally H<sub>i</sub>.
+    difficulty: U256,
+    /// A scalar value equal to the number of ancestor blocks. 
+    /// The genesis block has a number of zero; formally H<sub>i</sub>.
+    number: u64,
+    // TODO!!: continue...
 }
 
 #[cfg(test)]
