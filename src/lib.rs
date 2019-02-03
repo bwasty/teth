@@ -141,34 +141,67 @@ impl Transaction {
     }
 }
 
+/// H
 #[allow(dead_code)]
-struct Block {
+#[derive(Default)]
+pub struct BlockHeader {
     /// The Keccak 256-bit hash of the parent block’s header, in its entirety; formally H<sub>p</sub>.
-    parent_hash: H256,
+    pub parent_hash: H256,
     /// The Keccak 256-bit hash of the ommers list portion of this block; formally H<sub>o</sub>.
-    ommers_hash: H256,
+    pub ommers_hash: H256,
     /// The 160-bit address to which all fees collected from the successful mining of this block 
     /// be transferred; formally H<sub>c</sub>.
-    beneficiary: Address,
+    pub beneficiary: Address,
     /// The Keccak 256-bit hash of the root node of the state trie, after all transactions are 
     /// executed and finalisations applied; formally H<sub>r</sub>.
-    state_root: H256,
+    pub state_root: H256,
     /// The Keccak 256-bit hash of the root node of the trie structure populated with each 
     /// transaction in the transactions list portion of the block; formally H<sub>t</sub>.
-    transactions_root: H256,
+    pub transactions_root: H256,
     /// The Keccak 256-bit hash of the root node of the trie structure populated with the receipts
     /// of each transaction in the transactions list portion of the block; formally H<sub>e</sub>.
-    receipts_root: H256,
+    pub receipts_root: H256,
     /// The Bloom filter composed from indexable information (logger address and log topics) contained 
     /// in each log entry from the receipt of each transaction in the transactions list; formally H<sub>b</sub>.
-    logs_bloom: Bloom,
+    pub logs_bloom: Bloom,
     /// A scalar value equal to the number of ancestor blocks. 
     /// The genesis block has a number of zero; formally H<sub>i</sub>.
-    difficulty: U256,
+    pub difficulty: U256,
     /// A scalar value equal to the number of ancestor blocks. 
     /// The genesis block has a number of zero; formally H<sub>i</sub>.
-    number: u64,
-    // TODO!!: continue...
+    pub number: u64,
+    /// A scalar value equal to the current limit of gas expenditure per block; formally H<sub>l</sub>.
+    pub gas_limit: U256,
+    /// A scalar value equal to the total gas used in transactions in this block; formally H<sub>g</sub>.
+    pub gas_used: U256,
+    /// A scalar value equal to the reasonable output of Unix’s time() at this block’s inception; 
+    /// formally H<sub>s</sub>.
+    pub timestamp: u64,
+    /// An arbitrary byte array containing data relevant to this block. 
+    /// This must be 32 bytes or fewer; formally H<sub>x</sub>.
+    pub extra_data: [u8; 32],
+    /// A 256-bit hash which, combined with the nonce, proves that a sufficient amount of computation has 
+    /// been carried out on this block; formally H<sub>m</sub>.
+    pub mix_hash: H256,
+    /// A 64-bit value which, combined with the mix-hash, proves that a sufficient amount of computation has 
+    /// been carried out on this block; formally H<sub>n</sub>.
+    pub nonce: u64,
+}
+
+/// B 
+/// 
+/// The block in Ethereum is the collection of relevant pieces of information (known as the block header), _H_, 
+/// together with information corresponding to the comprised transactions, *T*, and a set of other block headers *U* 
+/// that are known to have a parent equal to the present block’s parent’s parent (such blocks are known as _ommers_).
+/// 
+/// Formally, we can refer to a block B:  
+/// B ≡ (B<sub>H</sub>,B<sub>T</sub>,B<sub>U</sub>)
+#[allow(dead_code)]
+#[derive(Default)]
+pub struct Block {
+    header: BlockHeader,
+    transactions: Vec<Transaction>,
+    ommers: Vec<BlockHeader>,
 }
 
 #[cfg(test)]
@@ -207,4 +240,13 @@ mod tests {
         let _t = Transaction::default();
     }
 
+    #[test]
+    fn test_block_header() {
+        let _h = BlockHeader::default();
+    }
+
+    #[test]
+    fn test_block() {
+        let _b = Block::default();
+    }
 }
