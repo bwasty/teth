@@ -8,3 +8,6 @@
 
 ## Current state
 Reading the Yellow Paper and stubbing some structs...
+
+## Difference to parity-ethereum
+`teth` uses some of the same util crates as `parity-ethereum` (such as `rlp`, `patricia-trie`, `tiny-keccak` and `ethereum-types`), but otherwise aims to be an independent implementation of the specification. Furthermore, `parity-ethereum` is quite large (~143k LoC) and has many options; `teth` aims to remain small and just implement the specification in a straight-forward manner.

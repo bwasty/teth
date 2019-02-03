@@ -1,6 +1,8 @@
 //! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/).
 //! Structs, fields and methods are annotated with their formal definition where applicable.
 
+use std::collections::HashMap;
+
 use ethereum_types::{Address, H256, U256, Bloom};
 use tiny_keccak::keccak256;
 
@@ -9,8 +11,7 @@ use tiny_keccak::keccak256;
 /// The world state (_state_), is a mapping between addresses (160-bit identifiers) and account states.
 #[derive(Debug)]
 pub struct WorldState {
-    // TODO!!: this should probably be a hash mapping from address to state...
-    pub accounts: Vec<AccountState>,
+    pub accounts: HashMap<Address, AccountState>,
 }
 
 #[allow(dead_code)]
@@ -19,19 +20,22 @@ impl WorldState {
     ///
     /// DEAD(σ, a) ≡ σ[a] = ∅ ∨ EMPTY(σ, a)
     pub fn is_account_dead(&self, account: &AccountState) -> bool {
-        account.is_empty() || !self.accounts.contains(account)
+        account.is_empty() || !self.accounts.values().any(|x| x == account)
     }
 }
 
+/// Alias for `ethereum_types::U256`
+pub type Wei = U256;
+
 /// σ[a]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct AccountState {
     /// A scalar value equal to the number of transactions sent from this address or,
     /// in the case of accounts with associated code, the number of contract-creations made by
     /// this account. For account of address a in state σ, this would be formally denoted σ[a]<sub>n</sub>.
     pub nonce: U256,
     /// A scalar value equal to the number of Wei owned by this address. Formally denoted σ[a]<sub>b</sub>.
-    pub balance: U256,
+    pub balance: Wei,
     /// A 256-bit hash of the root node of a Merkle Patricia tree that encodes the storage contents
     /// of the account (a mapping between 256-bit integer values), encoded into the trie as a mapping
     /// from the Keccak 256-bit hash of the 256-bit integer keys to the RLP-encoded 256-bit integer
@@ -94,7 +98,7 @@ pub struct Transaction {
     pub nonce: U256,
     /// A scalar value equal to the number of Wei to be paid per unit of _gas_ for all computation costs incurred
     /// as a result of the execution of this transaction; formally T<sub>p</sub>.
-    pub gas_price: U256,
+    pub gas_price: Wei,
     /// A scalar value equal to the maximum amount of gas that should be used in executing this transaction.
     /// This is paid up-front, before any computation is done and may not be increased later; formally T<sub>g</sub>.
     pub gas_limit: U256,
@@ -103,7 +107,7 @@ pub struct Transaction {
     pub to: Option<Address>,
     /// A scalar value equal to the number of Wei to be transferred to the message call’s recipient or,
     /// in the case of contract creation, as an endowment to the newly created account; formally T<sub>v</sub>.
-    pub value: U256,
+    pub value: Wei,
 
     /// Values corresponding to the signature of the transaction and used to determine the sender of the transaction;
     /// formally T<sub>w</sub>, T<sub>r</sub> and T<sub>s</sub>.
@@ -184,10 +188,18 @@ mod tests {
 
     #[test]
     fn test_world_state() {
+        let empty_acc = AccountState::default();
+        let non_empty_acc = AccountState { balance: 1.into(), .. Default::default() };
+        let non_empty_but_dead_acc = AccountState { balance: 2.into(), .. Default::default() };
         let world = WorldState {
-            accounts: vec![AccountState::default()],
+            accounts: vec![
+                (Address::random(), empty_acc.clone()),
+                (Address::random(), non_empty_acc.clone()),
+            ].into_iter().collect(),
         };
-        assert!(world.is_account_dead(&AccountState::default()));
+        assert!(world.is_account_dead(&empty_acc));
+        assert!(!world.is_account_dead(&non_empty_acc));
+        assert!(world.is_account_dead(&non_empty_but_dead_acc));
     }
 
     #[test]
