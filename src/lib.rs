@@ -136,7 +136,7 @@ impl Transaction {
     /// the ECDSA of the SECP-256k1 curve, using the hash of the transaction (excepting the latter three
     /// signature fields) as the datum to sign. For the present we simply assert that the sender of a
     /// given transaction T can be represented with S(T).
-    pub fn sender(&self) {
+    pub fn sender(&self) -> Address {
         unimplemented!() // TODO!
     }
 }
@@ -236,8 +236,10 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // TODO!!: missing implementation...
     fn test_transaction() {
-        let _t = Transaction::default();
+        let t = Transaction::default();
+        assert_eq!(t.sender(), Address::zero());
     }
 
     #[test]
