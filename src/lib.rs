@@ -1,8 +1,9 @@
-//! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/).
+//! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/) ([PDF](https://ethereum.github.io/yellowpaper/paper.pdf)).
 //! Structs, fields and methods are annotated with their formal definition where applicable.
 
 use std::collections::HashMap;
 
+use lazy_static::lazy_static;
 use ethereum_types::{Address, H256, U256, Bloom};
 use tiny_keccak::keccak256;
 
@@ -83,6 +84,38 @@ impl AccountState {
 
 // TODO!: v is the account validity function...
 
+/// ECDSA signature
+#[derive(Debug, Default)]
+pub struct Signature {
+    pub v: u8,
+    pub r: U256,
+    pub s: U256,
+}
+
+lazy_static! {
+    static ref SECP256K1N: U256 = U256::from_dec_str(
+        "115792089237316195423570985008687907852837564279074904382605163141518161494337").unwrap();
+}
+
+#[allow(dead_code)]
+impl Signature {
+    pub fn new(v: u8, r: U256, s: U256) -> Self {
+        Self { v, r, s }
+    }
+
+    /// We declare that an ECDSA signature is invalid unless all the following conditions are true:  
+    ///     0 < r < secp256k1n  
+    ///     0 < s < secp256k1n÷2+1  
+    ///     v ∈ {27, 28}  
+    /// where:  
+    ///     secp256k1n = 115792089237316195423570985008687907852837564279074904382605163141518161494337
+    pub fn is_valid(&self) -> bool {
+        self.r > U256::zero() && self.r < *SECP256K1N &&
+            self.s > U256::zero() && self.s < *SECP256K1N / 2 + 1 &&
+            self.v == 27 || self.v == 28
+    }
+}
+
 /// T
 ///
 /// A transaction (formally, T) is a single cryptographically-signed instruction constructed by an
@@ -110,10 +143,8 @@ pub struct Transaction {
     pub value: Wei,
 
     /// Values corresponding to the signature of the transaction and used to determine the sender of the transaction;
-    /// formally T<sub>w</sub>, T<sub>r</sub> and T<sub>s</sub>.
-    pub v: u8,
-    pub r: [u8; 32],
-    pub s: [u8; 32],
+    /// formally T<sub>w</sub>, T<sub>r</sub> and T<sub>s</sub>. This is expanded in Appendix F.
+    pub signature: Signature,
 
     /// An unlimited size byte array specifying the EVM-code for the account initialisation procedure, formally
     /// T<sub>i</sub>.  
@@ -250,5 +281,15 @@ mod tests {
     #[test]
     fn test_block() {
         let _b = Block::default();
+    }
+
+    #[test]
+    fn test_signature() {
+        let sig = Signature::new;
+        let s = sig(0, 0.into(), 0.into());
+        assert!(!s.is_valid());
+
+        let s1 = sig(27, 1.into(), 1.into());
+        assert!(s1.is_valid())
     }
 }
