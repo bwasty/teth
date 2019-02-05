@@ -2,9 +2,10 @@
 //! Structs, fields and methods are annotated with their formal definition where applicable.
 
 use std::collections::HashMap;
+use std::time::SystemTime;
 
 use lazy_static::lazy_static;
-use rlp::{Encodable, RlpStream};
+use rlp::{Encodable, RlpStream, EMPTY_LIST_RLP};
 use ethereum_types::{Address, H256, U256, Bloom};
 use tiny_keccak::keccak256;
 
@@ -80,7 +81,7 @@ impl AccountState {
     }
 }
 
-/// p(a) ≡ 􏰁KEC(a), RLP􏰁(σ[a]n, σ[a]b, σ[a]s, σ[a]c)􏰂)
+/// p(a) ≡ KEC(a), RLP(σ[a]n, σ[a]b, σ[a]s, σ[a]c))
 impl Encodable for AccountState {
     fn rlp_append(&self, s: &mut RlpStream) {
         s.append(&self.nonce);
@@ -237,13 +238,57 @@ pub struct BlockHeader {
 /// that are known to have a parent equal to the present block’s parent’s parent (such blocks are known as _ommers_).
 /// 
 /// Formally, we can refer to a block B:  
-/// B ≡ (B<sub>H</sub>,B<sub>T</sub>,B<sub>U</sub>)
+/// B ≡ (B<sub>H</sub>, B<sub>T</sub>, B<sub>U</sub>)
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Block {
     header: BlockHeader,
     transactions: Vec<Transaction>,
     ommers: Vec<BlockHeader>,
+}
+
+#[allow(dead_code)]
+impl Block {
+    /// Appendix I. Genesis Block
+    /// 
+    /// The genesis block is 15 items, and is specified thus:  
+    /// ((0<sub>256</sub>, KEC(RLP()), 0<sub>160</sub> , _stateRoot_, 0, 0, 0<sub>2048</sub> , 2<sup>17</sup> , 0, 0, 3141592, _time_, 0, 0<sub>256</sub> , KEC((42)), (), ())
+    /// 
+    /// Where 0<sub>256</sub> refers to the parent hash, a 256-bit hash which is all zeroes; 
+    /// 0<sub>160</sub> refers to the beneficiary address, a 160-bit hash which is all zeroes; 
+    /// 0<sub>2048</sub> refers to the log bloom, 2048-bit of all zeros; 2<sup>17</sup> refers 
+    /// to the difficulty; the transaction trie root, receipt trie root, gas used, block number 
+    /// and extradata are both 0, being equivalent to the empty byte array. The sequences of both 
+    /// ommers and transactions are empty and represented by (). KEC((42)) refers to the Keccak 
+    /// hash of a byte array of length one whose first and only byte is of value 42, used for 
+    /// the nonce. KEC(RLP()) value refers to the hash of the ommer list in RLP, both empty lists. 
+    /// 
+    /// The proof-of-concept series include a development premine, making the state root hash some 
+    /// value _stateRoot_. Also _time_ will be set to the initial timestamp of the genesis block. The 
+    /// latest documentation should be consulted for those values.
+    pub fn genesis_block() -> Self {
+        Block {
+            header: BlockHeader {
+                parent_hash: H256::zero(),
+                ommers_hash: keccak256(&EMPTY_LIST_RLP).into(),
+                beneficiary: Address::zero(),
+                state_root: H256::zero(), // TODO!: ??
+                transactions_root: H256::zero(),
+                receipts_root: H256::zero(),
+                logs_bloom: Bloom::zero(),
+                difficulty: (2 << 17).into(),
+                number: 0,
+                gas_limit: 3_141_592.into(),
+                gas_used: 0.into(),
+                timestamp: SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs(),
+                extra_data: [0; 32],
+                mix_hash: H256::zero(),
+                nonce: 42, // TODO: spec says KEC((42)), but it's a u64...?
+            },
+            transactions: vec![],
+            ommers: vec![]
+        }
+    }
 }
 
 #[cfg(test)]
