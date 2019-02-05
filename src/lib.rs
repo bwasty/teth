@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 
 use lazy_static::lazy_static;
+use rlp::{Encodable, RlpStream};
 use ethereum_types::{Address, H256, U256, Bloom};
 use tiny_keccak::keccak256;
 
@@ -76,6 +77,16 @@ impl AccountState {
     /// EMPTY(σ, a) ≡ σ[a]<sub>c</sub> = KEC(()) ∧ σ[a]<sub>n</sub> = 0 ∧ σ[a]<sub>b</sub> = 0
     pub fn is_empty(&self) -> bool {
         self.nonce.is_zero() && self.balance.is_zero() && !self.has_code()
+    }
+}
+
+/// p(a) ≡ 􏰁KEC(a), RLP􏰁(σ[a]n, σ[a]b, σ[a]s, σ[a]c)􏰂)
+impl Encodable for AccountState {
+    fn rlp_append(&self, s: &mut RlpStream) {
+        s.append(&self.nonce);
+        s.append(&self.balance);
+        s.append(&self.storage_root);
+        s.append(&self.code_hash);
     }
 }
 
