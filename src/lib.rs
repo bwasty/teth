@@ -207,8 +207,8 @@ pub struct BlockHeader {
     /// The Bloom filter composed from indexable information (logger address and log topics) contained 
     /// in each log entry from the receipt of each transaction in the transactions list; formally H<sub>b</sub>.
     pub logs_bloom: Bloom,
-    /// A scalar value equal to the number of ancestor blocks. 
-    /// The genesis block has a number of zero; formally H<sub>i</sub>.
+    /// A scalar value corresponding to the difficulty level of this block. This can be calculated from 
+    /// the previous block’s difficulty level and the timestamp; formally H<sub>d</sub>.
     pub difficulty: U256,
     /// A scalar value equal to the number of ancestor blocks. 
     /// The genesis block has a number of zero; formally H<sub>i</sub>.
@@ -242,9 +242,13 @@ pub struct BlockHeader {
 #[allow(dead_code)]
 #[derive(Default)]
 pub struct Block {
-    header: BlockHeader,
-    transactions: Vec<Transaction>,
-    ommers: Vec<BlockHeader>,
+    /// B<sub>H</sub>
+    pub header: BlockHeader,
+    /// B<sub>T</sub>
+    pub transactions: Vec<Transaction>,
+    /// B<sub>U</sub>  
+    /// Also known as 'uncles'.
+    pub ommers: Vec<BlockHeader>,
 }
 
 #[allow(dead_code)]
