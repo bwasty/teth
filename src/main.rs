@@ -33,6 +33,7 @@ enum SubCommand {
         #[structopt(long)]
         bootstrap: bool,
     },
+
     /// Show information about accounts.
     #[structopt(
         name = "account",
@@ -42,21 +43,23 @@ enum SubCommand {
         #[structopt(subcommand)]
         account: AccountSubCommand,
     },
+
     /// Show information about transactions.
     #[structopt(
         name = "transaction",
         raw(setting = "structopt::clap::AppSettings::ColoredHelp")
     )]
     Transaction {
-        // TODO!!
+        // TODO!
     },
+
     /// Show information about blocks.
     #[structopt(
         name = "block",
         raw(setting = "structopt::clap::AppSettings::ColoredHelp")
     )]
     Block {
-        // TODO!!
+        // TODO!
     },
 }
 
@@ -81,4 +84,33 @@ fn main() {
 
     let opt = Opt::from_args();
     println!("{:?}", opt);
+    match opt.commands {
+        SubCommand::Node { bootstrap } => {
+            if bootstrap {
+                println!("not implemented yet, but here's the genesis block: {:?}",
+                    Block::genesis_block())
+            }
+            else {
+                // TODO!: connect to master node (teth.malkut.net / localhost -> arg...)
+                unimplemented!()
+            }
+        },
+        SubCommand::Account { account } => {
+            match account {
+                AccountSubCommand::Show { address } => {
+                    dbg!(address);
+                    unimplemented!() // TODO!
+                },
+                AccountSubCommand::List => {
+                    unimplemented!() // TODO!
+                }
+            }
+        },
+        SubCommand::Transaction {} => {
+            unimplemented!() // TODO!
+        },
+        SubCommand::Block {} => {
+            unimplemented!() // TODO!
+        }
+    }
 }

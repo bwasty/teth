@@ -191,7 +191,7 @@ impl Transaction {
 
 /// H
 #[allow(dead_code)]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct BlockHeader {
     /// The Keccak 256-bit hash of the parent block’s header, in its entirety; formally H<sub>p</sub>.
     pub parent_hash: H256,
@@ -245,7 +245,7 @@ pub struct BlockHeader {
 /// Formally, we can refer to a block B:  
 /// B ≡ (B<sub>H</sub>, B<sub>T</sub>, B<sub>U</sub>)
 #[allow(dead_code)]
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Block {
     /// B<sub>H</sub>
     pub header: BlockHeader,
