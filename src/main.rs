@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use structopt::StructOpt;
-
 use ethereum_types::Address;
 
 mod lib;
@@ -34,7 +33,7 @@ enum SubCommand {
         bootstrap: bool,
     },
 
-    /// Show information about accounts.
+    /// Query information about accounts.
     #[structopt(
         name = "account",
         raw(setting = "structopt::clap::AppSettings::ColoredHelp")
@@ -44,7 +43,7 @@ enum SubCommand {
         account: AccountSubCommand,
     },
 
-    /// Show information about transactions.
+    /// Query information about transactions.
     #[structopt(
         name = "transaction",
         raw(setting = "structopt::clap::AppSettings::ColoredHelp")
@@ -53,7 +52,7 @@ enum SubCommand {
         // TODO!
     },
 
-    /// Show information about blocks.
+    /// Query information about blocks.
     #[structopt(
         name = "block",
         raw(setting = "structopt::clap::AppSettings::ColoredHelp")
