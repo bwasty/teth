@@ -1,10 +1,13 @@
+//! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/) ([PDF](https://ethereum.github.io/yellowpaper/paper.pdf)).
+//! Structs, fields and methods are annotated with their formal definition where applicable.
+
 use std::collections::HashMap;
 
 use structopt::StructOpt;
 use ethereum_types::Address;
 
 mod lib;
-use lib::*;
+pub use lib::*;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
