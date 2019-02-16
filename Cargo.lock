@@ -434,7 +434,7 @@ dependencies = [
 
 [[package]]
 name = "teth"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "ethbloom 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ethereum-types 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",

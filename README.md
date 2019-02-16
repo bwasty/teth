@@ -18,7 +18,7 @@ _NOTE: Almost every command will fail with 'not implemented yet' at the moment!_
 
 Run `teth` without arguments to see options and subcommands:
 ```
-teth 0.1.0
+teth 0.0.1
 A Toy Ethereum implementation.
 
 USAGE:

@@ -5,90 +5,9 @@
 use std::collections::HashMap;
 
 use structopt::StructOpt;
-use ethereum_types::Address;
 
 mod lib;
 pub use lib::*;
-
-#[derive(Debug, StructOpt)]
-#[structopt(
-    about = "A Toy Ethereum implementation.",
-    author = "",
-    raw(
-        setting = "structopt::clap::AppSettings::ColoredHelp",
-        setting = "structopt::clap::AppSettings::DeriveDisplayOrder"
-    )
-)]
-struct Opt {
-    #[structopt(subcommand)]
-    commands: SubCommand,
-}
-
-#[derive(StructOpt, Debug)]
-enum SubCommand {
-    /// Run a node.
-    #[structopt(
-        name = "node",
-        author = "",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    Node {
-        /// Bootstrap the chain (with the genesis block).
-        #[structopt(long)]
-        bootstrap: bool,
-    },
-
-    /// Query information about accounts.
-    #[structopt(
-        name = "account",
-        author = "",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    Account {
-        #[structopt(subcommand)]
-        account: AccountSubCommand,
-    },
-
-    /// Query information about transactions.
-    #[structopt(
-        name = "transaction",
-        author = "",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    Transaction {
-        // TODO!
-    },
-
-    /// Query information about blocks.
-    #[structopt(
-        name = "block",
-        author = "",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    Block {
-        // TODO!
-    },
-}
-
-#[derive(StructOpt, Debug)]
-enum AccountSubCommand {
-    /// Show details of account (balance etc.)
-    #[structopt(
-        name = "show",
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    Show { address: Address },
-    /// List accounts, ordered by balance (descending)
-    #[structopt(
-        name = "list",
-        raw(setting = "structopt::clap::AppSettings::DisableVersion")
-    )]
-    List,
-}
 
 fn main() {
     let _world = WorldState {
@@ -99,7 +18,7 @@ fn main() {
     let _acc = AccountState::default();
     // dbg!(acc);
 
-    let opt = Opt::from_args();
+    let opt = Options::from_args();
     match opt.commands {
         SubCommand::Node { bootstrap } => {
             if bootstrap {

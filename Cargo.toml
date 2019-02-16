@@ -1,6 +1,6 @@
 [package]
 name = "teth"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Benjamin Wasty <benny.wasty@gmail.com>"]
 license = "GPL-3.0"
 edition = "2018"
