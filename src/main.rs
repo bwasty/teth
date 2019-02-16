@@ -22,28 +22,29 @@ fn main() {
     match opt.commands {
         SubCommand::Node { bootstrap } => {
             if bootstrap {
-                println!("not implemented yet, but here's the genesis block: {:?}",
-                    Block::genesis_block())
-            }
-            else {
+                println!(
+                    "not implemented yet, but here's the genesis block: {:?}",
+                    Block::genesis_block()
+                )
+            } else {
                 // TODO!: connect to master node (teth.malkut.net / localhost -> arg...)
                 unimplemented!()
             }
-        },
+        }
         SubCommand::Account { account } => {
             match account {
                 AccountSubCommand::Show { address } => {
                     dbg!(address);
                     unimplemented!() // TODO!
-                },
+                }
                 AccountSubCommand::List => {
                     unimplemented!() // TODO!
                 }
             }
-        },
+        }
         SubCommand::Transaction {} => {
             unimplemented!() // TODO!
-        },
+        }
         SubCommand::Block {} => {
             unimplemented!() // TODO!
         }

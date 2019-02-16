@@ -1,5 +1,5 @@
+use ethereum_types::Address;
 use std::collections::HashMap;
-use ethereum_types::{Address};
 // use patricia_trie_ethereum::TrieDB;
 
 use crate::lib::accountstate::AccountState;
