@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use ethereum_types::{Address};
+// use patricia_trie_ethereum::TrieDB;
 
 use crate::lib::accountstate::AccountState;
 
@@ -9,6 +10,7 @@ use crate::lib::accountstate::AccountState;
 #[derive(Debug)]
 pub struct WorldState {
     pub accounts: HashMap<Address, AccountState>,
+    // pub trie: TrieDB,
 }
 
 #[allow(dead_code)]
