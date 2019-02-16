@@ -1,5 +1,6 @@
 //! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/) ([PDF](https://ethereum.github.io/yellowpaper/paper.pdf)).
 //! Structs, fields and methods are annotated with their formal definition where applicable.
+//! See [README.md](https://github.com/bwasty/teth/blob/master/README.md) for more info.
 
 use std::collections::HashMap;
 
@@ -28,7 +29,9 @@ enum SubCommand {
     /// Run a node.
     #[structopt(
         name = "node",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp")
+        author = "",
+        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
     )]
     Node {
         /// Bootstrap the chain (with the genesis block).
@@ -39,7 +42,9 @@ enum SubCommand {
     /// Query information about accounts.
     #[structopt(
         name = "account",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp")
+        author = "",
+        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
     )]
     Account {
         #[structopt(subcommand)]
@@ -49,7 +54,9 @@ enum SubCommand {
     /// Query information about transactions.
     #[structopt(
         name = "transaction",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp")
+        author = "",
+        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
     )]
     Transaction {
         // TODO!
@@ -58,7 +65,9 @@ enum SubCommand {
     /// Query information about blocks.
     #[structopt(
         name = "block",
-        raw(setting = "structopt::clap::AppSettings::ColoredHelp")
+        author = "",
+        raw(setting = "structopt::clap::AppSettings::ColoredHelp"),
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
     )]
     Block {
         // TODO!
@@ -68,24 +77,29 @@ enum SubCommand {
 #[derive(StructOpt, Debug)]
 enum AccountSubCommand {
     /// Show details of account (balance etc.)
-    #[structopt(name = "show")]
+    #[structopt(
+        name = "show",
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
+    )]
     Show { address: Address },
     /// List accounts, ordered by balance (descending)
-    #[structopt(name = "list")]
+    #[structopt(
+        name = "list",
+        raw(setting = "structopt::clap::AppSettings::DisableVersion")
+    )]
     List,
 }
 
 fn main() {
-    let world = WorldState {
+    let _world = WorldState {
         accounts: HashMap::new(),
     };
-    dbg!(world);
+    // dbg!(world);
 
-    let acc = AccountState::default();
-    dbg!(acc);
+    let _acc = AccountState::default();
+    // dbg!(acc);
 
     let opt = Opt::from_args();
-    println!("{:?}", opt);
     match opt.commands {
         SubCommand::Node { bootstrap } => {
             if bootstrap {

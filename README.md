@@ -1,16 +1,63 @@
-# teth - Toy Ethereum Client 
+# teth - Toy Ethereum Client
+[![Docs](https://img.shields.io/badge/docs-github.io-informational.svg)](https://bwasty.github.io/teth/teth/index.html)
 [![Actions Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/bwasty/teth?style=flat)](https://github.com/bwasty/teth/actions) [![](https://tokei.rs/b1/github/bwasty/teth)](https://github.com/Aaronepower/tokei) [![](https://tokei.rs/b1/github/bwasty/teth?category=comments)](https://github.com/Aaronepower/tokei) 
 
 ## Goals
 * implement Ethereum straight from the [Yellow Paper](https://github.com/ethereum/yellowpaper/)
-* (over)simplify things for a short and understandable implementation
+* (over)simplify things at first for a short and understandable implementation
   - compatibility with real Ethereum: maybe later
 
 ## Current state
 There are structs that should cover all necessary data structures, but not much more. Still reading the Yellow Paper...
 
 ## Difference to parity-ethereum
-`teth` uses some of the same util crates as `parity-ethereum` (such as `rlp`, `patricia-trie`, `tiny-keccak` and `ethereum-types`), but otherwise aims to be an independent implementation of the specification. Furthermore, `parity-ethereum` is quite large (~143k LoC) and has many options; `teth` aims to remain small and just implement the specification in a straight-forward manner.
+`teth` uses many of the same utility crates as `parity-ethereum` (such as `rlp`, `patricia-trie`, `tiny-keccak` and `ethereum-types`), but otherwise aims to be an independent implementation of the specification. Also, `parity-ethereum` is quite large (~143k LoC) and has many options; `teth` will remain small and just implement the specification in a straight-forward manner.
+
+## Usage
+_NOTE: Almost every command will fail with 'not implemented yet' at the moment!_
+
+Run `teth` without arguments to see options and subcommands:
+```
+teth 0.1.0
+A Toy Ethereum implementation.
+
+USAGE:
+    teth <SUBCOMMAND>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+SUBCOMMANDS:
+    node           Run a node.
+    account        Query information about accounts.
+    transaction    Query information about transactions.
+    block          Query information about blocks.
+    help           Prints this message or the help of the given subcommand(s)
+```
+`teth help node`:
+```
+USAGE:
+    teth node [FLAGS]
+
+FLAGS:
+        --bootstrap    Bootstrap the chain (with the genesis block).
+    -h, --help         Prints help information
+```
+`teth help account`:
+```
+USAGE:
+    teth account <SUBCOMMAND>
+
+FLAGS:
+    -h, --help    Prints help information
+
+SUBCOMMANDS:
+    help    Prints this message or the help of the given subcommand(s)
+    list    List accounts, ordered by balance (descending)
+    show    Show details of account (balance etc.)
+```
+
 
 ## Development
 
