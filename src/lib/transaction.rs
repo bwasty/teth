@@ -1,13 +1,17 @@
 use ethereum_types::{Address, U256};
 use lazy_static::lazy_static;
+use rlp::{Encodable, RlpStream};
 
 use crate::lib::Wei;
 
 /// ECDSA signature
 #[derive(Debug, Default)]
 pub struct Signature {
+    /// T<sub>w</sub>
     pub v: u8,
+    /// T<sub>r</sub>
     pub r: U256,
+    /// T<sub>s</sub>
     pub s: U256,
 }
 
@@ -93,6 +97,25 @@ impl Transaction {
     /// given transaction T can be represented with S(T).
     pub fn sender(&self) -> Address {
         unimplemented!() // TODO!
+    }
+}
+
+/// Equation 15
+impl Encodable for Transaction {
+    fn rlp_append(&self, s: &mut RlpStream) {
+        s.append(&self.nonce);
+        s.append(&self.gas_price);
+        s.append(&self.gas_limit);
+        s.append(&self.to);
+        s.append(&self.value);
+        if self.to.is_none() {
+            s.append(&self.init);
+        } else {
+            s.append(&self.data);
+        }
+        s.append(&self.signature.v);
+        s.append(&self.signature.r);
+        s.append(&self.signature.s);
     }
 }
 

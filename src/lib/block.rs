@@ -1,5 +1,5 @@
 use ethereum_types::{Address, Bloom, H256, U256};
-use rlp::EMPTY_LIST_RLP;
+use rlp::{EMPTY_LIST_RLP, Encodable, RlpStream};
 use tiny_keccak::keccak256;
 
 use std::time::SystemTime;
@@ -55,7 +55,7 @@ pub struct BlockHeader {
 
 impl BlockHeader {
     // TODO!: refactor parameters... (self?)
-    /// D(H) - Section 4.3.4, Formulas 41-46
+    /// D(H) - Section 4.3.4, Equations 41-46
     pub fn difficulty(
         parent_number: u64,
         parent_difficulty: U256,
@@ -79,16 +79,23 @@ impl BlockHeader {
         }
     }
 
-    /// The canonical gas limit H<sub>l</sub> of a block of header H must fulfil this relation (formula 47).
+    /// The canonical gas limit H<sub>l</sub> of a block of header H must fulfil this relation (Equation 47).
     pub fn validate_gas_limit(gas_limit: U256, parent_gas_limit: U256) -> bool {
-        gas_limit < parent_gas_limit + parent_gas_limit / 1024 &&
-            gas_limit > parent_gas_limit - parent_gas_limit / 1024 &&
-            gas_limit >= 5000.into()
+        gas_limit < parent_gas_limit + parent_gas_limit / 1024
+            && gas_limit > parent_gas_limit - parent_gas_limit / 1024
+            && gas_limit >= 5000.into()
     }
 
-    /// Formula 48
+    /// Equation 48
     pub fn validate_timestamp(timestamp: u64, parent_timestamp: u64) -> bool {
         timestamp > parent_timestamp
+    }
+
+    /// Equation 49
+    pub fn validate_nonce(nonce: u64, difficulty: U256) -> bool {
+        let _ = nonce <= (U256::from(2).pow(256.into()) / difficulty).as_u64();
+        // TODO!: mix hash, PoW part...
+        unimplemented!()
     }
 
     pub fn validate(&self) -> bool {
@@ -96,6 +103,27 @@ impl BlockHeader {
         // Self::validate_gas_limit(self.gas_limit, parent_gas_limit: U256)
         // Self::validate_timestamp(self.timestamp, parent_timestamp: u64)
         unimplemented!()
+    }
+}
+
+impl Encodable for BlockHeader {
+    fn rlp_append(&self, s: &mut RlpStream) {
+        s.append(&self.parent_hash);
+        s.append(&self.ommers_hash);
+        s.append(&self.beneficiary);
+        s.append(&self.state_root);
+        s.append(&self.transactions_root);
+        s.append(&self.receipts_root);
+        s.append(&self.logs_bloom);
+        s.append(&self.difficulty);
+        s.append(&self.number);
+        s.append(&self.gas_limit);
+        s.append(&self.gas_used);
+        s.append(&self.timestamp);
+        let extra_data: &[u8] = &self.extra_data;
+        s.append(&extra_data);
+        s.append(&self.mix_hash);
+        s.append(&self.nonce);
     }
 }
 
@@ -163,6 +191,14 @@ impl Block {
             transactions: vec![],
             ommers: vec![],
         }
+    }
+}
+
+impl Encodable for Block {
+    fn rlp_append(&self, s: &mut RlpStream) {
+        s.append(&self.header);
+        for t in &self.transactions { s.append(t); }
+        for o in &self.ommers { s.append(o); }
     }
 }
 
