@@ -53,6 +53,33 @@ pub struct BlockHeader {
     pub nonce: u64,
 }
 
+impl BlockHeader {
+    // TODO!: refactor parameters... (self?)
+    /// D(H) - Section 4.3.4
+    pub fn difficulty(
+        parent_number: u64,
+        parent_difficulty: U256,
+        num_parent_ommers: u64,
+        parent_timestamp: u64,
+        timestamp: u64,
+        number: u64,
+    ) -> U256 {
+        let d0 = U256::from(131_072); // D<sub>0</sub>
+        if parent_number == 0 {
+            d0
+        } else {
+            // TODO: 'unsafe' casts below?
+            let x = parent_difficulty / 2048;
+            let y: i64 = if num_parent_ommers == 0 { 1 } else { 2 };
+            let varsigma2 = (y - ((timestamp - parent_timestamp) / 9) as i64).max(-99);
+            // H<sub>i</sub>'
+            let fake_block_number = (number - 3_000_000).max(0) as u32;
+            let epsilon = 2u64.pow(fake_block_number / 100_000 - 2);
+            d0.max(parent_difficulty + x * varsigma2 + epsilon)
+        }
+    }
+}
+
 /// B
 ///
 /// The block in Ethereum is the collection of relevant pieces of information (known as the block header), _H_,
@@ -127,6 +154,15 @@ mod tests {
     #[test]
     fn test_block_header() {
         let _h = BlockHeader::default();
+    }
+
+    #[test]
+    fn test_block_header_difficulty() {
+        let diff = BlockHeader::difficulty;
+        let d0 = diff(0, 0.into(), 0, 0, 0, 0);
+        assert_eq!(d0, U256::from(131_072));
+
+        // TODO!: test for non-zero case(s)
     }
 
     #[test]
