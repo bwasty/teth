@@ -55,7 +55,7 @@ pub struct BlockHeader {
 
 impl BlockHeader {
     // TODO!: refactor parameters... (self?)
-    /// D(H) - Section 4.3.4
+    /// D(H) - Section 4.3.4, Formulas 41-46
     pub fn difficulty(
         parent_number: u64,
         parent_difficulty: U256,
@@ -77,6 +77,25 @@ impl BlockHeader {
             let epsilon = 2u64.pow(fake_block_number / 100_000 - 2);
             d0.max(parent_difficulty + x * varsigma2 + epsilon)
         }
+    }
+
+    /// The canonical gas limit H<sub>l</sub> of a block of header H must fulfil this relation (formula 47).
+    pub fn validate_gas_limit(gas_limit: U256, parent_gas_limit: U256) -> bool {
+        gas_limit < parent_gas_limit + parent_gas_limit / 1024 &&
+            gas_limit > parent_gas_limit - parent_gas_limit / 1024 &&
+            gas_limit >= 5000.into()
+    }
+
+    /// Formula 48
+    pub fn validate_timestamp(timestamp: u64, parent_timestamp: u64) -> bool {
+        timestamp > parent_timestamp
+    }
+
+    pub fn validate(&self) -> bool {
+        // TODO!!: how to access parent?
+        // Self::validate_gas_limit(self.gas_limit, parent_gas_limit: U256)
+        // Self::validate_timestamp(self.timestamp, parent_timestamp: u64)
+        unimplemented!()
     }
 }
 
