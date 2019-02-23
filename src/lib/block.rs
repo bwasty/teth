@@ -1,5 +1,5 @@
 use ethereum_types::{Address, Bloom, H256, U256};
-use rlp::{EMPTY_LIST_RLP, Encodable, RlpStream};
+use rlp::{Encodable, RlpStream, EMPTY_LIST_RLP};
 use tiny_keccak::keccak256;
 
 use std::time::SystemTime;
@@ -197,8 +197,12 @@ impl Block {
 impl Encodable for Block {
     fn rlp_append(&self, s: &mut RlpStream) {
         s.append(&self.header);
-        for t in &self.transactions { s.append(t); }
-        for o in &self.ommers { s.append(o); }
+        for t in &self.transactions {
+            s.append(t);
+        }
+        for o in &self.ommers {
+            s.append(o);
+        }
     }
 }
 

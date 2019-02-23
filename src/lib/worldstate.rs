@@ -1,20 +1,40 @@
-use ethereum_types::Address;
 use std::collections::HashMap;
-// use patricia_trie_ethereum::TrieDB;
+
+use ethereum_types::{Address, /*H256*/};
+// use keccak_hasher::KeccakHasher;
+// use kvdb::DBValue;
+// use memorydb::MemoryDB;
+// use patricia_trie_ethereum::TrieDBMut;
+// use hash_db::HashDB;
 
 use crate::lib::accountstate::AccountState;
 
 /// σ
 ///
 /// The world state (_state_), is a mapping between addresses (160-bit identifiers) and account states.
-#[derive(Debug)]
-pub struct WorldState {
+#[derive(Debug, Default)]
+pub struct WorldState/*<'db>*/ {
     pub accounts: HashMap<Address, AccountState>,
-    // pub trie: TrieDB,
+
+    // pub account_db: TrieDBMut<'db>,
+    // db: HashDB<KeccakHasher, DBValue>,
 }
 
 #[allow(dead_code)]
 impl WorldState {
+    pub fn new() -> Self {
+        // let mut memdb = MemoryDB::<KeccakHasher, DBValue>::new();
+        // let mut root = H256::new();
+        // let mut t = TrieDBMut::new(&mut memdb, &mut root);
+
+        // let db = HashDB::<KeccakHasher, DBValue>new();
+        // let account_db =
+        WorldState { 
+            accounts: HashMap::new(), 
+            // account_db:: TrieDBMut::new(&mut memdb, &mut root);
+        }
+    }
+
     /// An account is dead when its account state is non-existent or empty:
     ///
     /// DEAD(σ, a) ≡ σ[a] = ∅ ∨ EMPTY(σ, a)
