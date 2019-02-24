@@ -3,6 +3,7 @@ use lazy_static::lazy_static;
 use rlp::{Encodable, RlpStream};
 
 use crate::lib::Wei;
+use crate::lib::FEES;
 
 /// ECDSA signature
 #[derive(Debug, Default)]
@@ -98,6 +99,40 @@ impl Transaction {
     pub fn sender(&self) -> Address {
         unimplemented!() // TODO!
     }
+
+    /// Section 6 (beginning)
+    pub fn validate(&self) {
+        // TODO!!:
+        // (1) The transaction is well-formed RLP, with no additional trailing bytes;
+        // (2) the transaction signature is valid; 
+        // (3) the transaction nonce is valid (equivalent to the sender account’s current nonce);
+        // (4) the gas limit is no smaller than the intrinsic gas, g0, used by the transaction; and
+        // (5) the sender account balance contains at least the cost, v0, required in up-front payment.
+        unimplemented!()
+    }
+
+    /// Section 6.2: We define intrinsic gas g<sub>0</sub>, the amount of gas this transaction requires to be paid prior 
+    /// to execution, as follows:
+    pub fn intrinsic_gas(&self) -> u64 {
+        let mut g0: u64 = 0;
+        let data_or_code = 
+            if let Some(init) = &self.init { init } 
+            else if let Some(data) = &self.data { data }
+            else { unreachable!() };
+
+        g0 += data_or_code.iter()
+            .map(|i| if *i == 0 { FEES.tx_data_zero } else { FEES.tx_data_non_zero })
+            .sum::<u64>();
+
+        if self.to.is_none() {
+            g0 += FEES.tx_create;
+        }
+
+        g0 += FEES.transaction;
+
+        g0
+    }
+        
 }
 
 /// Equation 15

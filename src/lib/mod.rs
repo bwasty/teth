@@ -15,3 +15,6 @@ pub use self::block::*;
 
 mod options;
 pub use self::options::*;
+
+mod feeschedule;
+pub use self::feeschedule::*;
