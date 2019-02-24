@@ -98,11 +98,21 @@ impl BlockHeader {
         unimplemented!()
     }
 
+    /// Block header validity function V(H) (Equation 50)
     pub fn validate(&self) -> bool {
-        // TODO!!: how to access parent?
-        // Self::validate_gas_limit(self.gas_limit, parent_gas_limit: U256)
-        // Self::validate_timestamp(self.timestamp, parent_timestamp: u64)
-        unimplemented!()
+        // TODO!!: log each step if false
+        let mut valid = Self::validate_nonce(self.nonce, self.difficulty);
+
+        valid &= self.gas_used <= self.gas_limit;
+        // TODO!!!: how to access parent?
+        let parent = BlockHeader::default();
+        valid &= Self::validate_gas_limit(self.gas_limit, parent.gas_limit);
+        valid &= Self::validate_timestamp(self.timestamp, parent.timestamp);
+        valid &= self.number == parent.number + 1;
+
+        // no need to check: ∥Hx∥ ≤ 32 (extra_data is a [u8; 32])
+
+        valid
     }
 }
 
