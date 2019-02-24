@@ -2,8 +2,7 @@ use ethereum_types::{Address, U256};
 use lazy_static::lazy_static;
 use rlp::{Encodable, RlpStream};
 
-use crate::lib::Wei;
-use crate::lib::FEES;
+use crate::lib::{Wei, FEES, WorldState};
 
 /// ECDSA signature
 #[derive(Debug, Default)]
@@ -104,24 +103,44 @@ impl Transaction {
     pub fn validate(&self) {
         // TODO!!:
         // (1) The transaction is well-formed RLP, with no additional trailing bytes;
-        // (2) the transaction signature is valid; 
+        // (2) the transaction signature is valid;
         // (3) the transaction nonce is valid (equivalent to the sender account’s current nonce);
         // (4) the gas limit is no smaller than the intrinsic gas, g0, used by the transaction; and
         // (5) the sender account balance contains at least the cost, v0, required in up-front payment.
+
+        // See also Equation 58:
+        // S(T) != ∅ ∧
+        // σ[S(T)] != ∅ ∧
+        // Tn = σ[S(T)]n ∧
+        // g0 <= Tg ∧
+        // v0 <= σ[S(T)]b ∧
+        // Tg <= B_Hl−l(B_R)u
+        //  -> he sum of the transaction’s gas limit, Tg, and the gas utilised in this block prior,
+        //     given by l(BR)u, must be no greater than the block’s gasLimit, BHl
         unimplemented!()
     }
 
-    /// Section 6.2: We define intrinsic gas g<sub>0</sub>, the amount of gas this transaction requires to be paid prior 
+    /// Section 6.2: We define intrinsic gas g<sub>0</sub>, the amount of gas this transaction requires to be paid prior
     /// to execution, as follows:
     pub fn intrinsic_gas(&self) -> u64 {
         let mut g0: u64 = 0;
-        let data_or_code = 
-            if let Some(init) = &self.init { init } 
-            else if let Some(data) = &self.data { data }
-            else { unreachable!() };
+        let data_or_code = if let Some(init) = &self.init {
+            init
+        } else if let Some(data) = &self.data {
+            data
+        } else {
+            unreachable!()
+        };
 
-        g0 += data_or_code.iter()
-            .map(|i| if *i == 0 { FEES.tx_data_zero } else { FEES.tx_data_non_zero })
+        g0 += data_or_code
+            .iter()
+            .map(|i| {
+                if *i == 0 {
+                    FEES.tx_data_zero
+                } else {
+                    FEES.tx_data_non_zero
+                }
+            })
             .sum::<u64>();
 
         if self.to.is_none() {
@@ -132,7 +151,30 @@ impl Transaction {
 
         g0
     }
-        
+
+    /// v<sub>0</sub> (Equation 57)
+    pub fn up_front_cost(&self) -> U256 {
+        self.gas_limit * self.gas_price + self.value
+    }
+
+    /// Section 6.2
+    pub fn execute(&self, state: &mut WorldState) {
+        let mut sender_account = state.accounts[&self.sender()].clone();
+        // Equation 60
+        sender_account.balance -= self.gas_limit * self.gas_price;
+        // Equationn 61
+        sender_account.nonce += 1.into();
+
+        // => checkpoint state σ0
+
+        // gas available for the proceeding computation (Equation 63)
+        let g = self.gas_limit - self.intrinsic_gas();
+    
+    
+    }
+
+    // TODO!: refund counter, self destructed accounts... equation 64
+    // TODO!: g* ... Equation 65
 }
 
 /// Equation 15

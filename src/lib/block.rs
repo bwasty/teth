@@ -99,13 +99,11 @@ impl BlockHeader {
     }
 
     /// Block header validity function V(H) (Equation 50)
-    pub fn validate(&self) -> bool {
+    pub fn validate(&self, parent: &BlockHeader) -> bool {
         // TODO!!: log each step if false
         let mut valid = Self::validate_nonce(self.nonce, self.difficulty);
 
         valid &= self.gas_used <= self.gas_limit;
-        // TODO!!!: how to access parent?
-        let parent = BlockHeader::default();
         valid &= Self::validate_gas_limit(self.gas_limit, parent.gas_limit);
         valid &= Self::validate_timestamp(self.timestamp, parent.timestamp);
         valid &= self.number == parent.number + 1;

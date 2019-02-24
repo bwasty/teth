@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ethereum_types::{Address, /*H256*/};
+use ethereum_types::Address;
 // use keccak_hasher::KeccakHasher;
 // use kvdb::DBValue;
 // use memorydb::MemoryDB;
@@ -13,9 +13,8 @@ use crate::lib::accountstate::AccountState;
 ///
 /// The world state (_state_), is a mapping between addresses (160-bit identifiers) and account states.
 #[derive(Debug, Default)]
-pub struct WorldState/*<'db>*/ {
+pub struct WorldState {
     pub accounts: HashMap<Address, AccountState>,
-
     // pub account_db: TrieDBMut<'db>,
     // db: HashDB<KeccakHasher, DBValue>,
 }
@@ -29,8 +28,8 @@ impl WorldState {
 
         // let db = HashDB::<KeccakHasher, DBValue>new();
         // let account_db =
-        WorldState { 
-            accounts: HashMap::new(), 
+        WorldState {
+            accounts: HashMap::new(),
             // account_db:: TrieDBMut::new(&mut memdb, &mut root);
         }
     }
