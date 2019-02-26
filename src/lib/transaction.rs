@@ -2,7 +2,7 @@ use ethereum_types::{Address, U256};
 use lazy_static::lazy_static;
 use rlp::{Encodable, RlpStream};
 
-use crate::lib::{Wei, FEES, WorldState};
+use crate::lib::{AccountState, Wei, WorldState, FEES};
 
 /// ECDSA signature
 #[derive(Debug, Default)]
@@ -169,12 +169,44 @@ impl Transaction {
 
         // gas available for the proceeding computation (Equation 63)
         let g = self.gas_limit - self.intrinsic_gas();
-    
-    
+
+        if self.to.is_some() {
+            self.execute_message_call(state)
+        } else {
+            self.execute_contract_creation()
+        }
+
+        // TODO!!?
     }
 
     // TODO!: refund counter, self destructed accounts... equation 64
     // TODO!: g* ... Equation 65
+
+    /// Section 7
+    pub fn execute_contract_creation(&self) {
+        unimplemented!() // TODO!!
+    }
+
+    /// Section 8
+    pub fn execute_message_call(&self, state: &mut WorldState) {
+        // We define σ1, the first transitional state as the original state but with the value
+        // transferred from sender to recipient (Equation 99)
+
+        let sender_address = self.sender();
+        let mut sender_account = state.accounts[&sender_address].clone();
+        let to_address = self.to.expect("message call needs a recipient!");
+        let mut recipient_account = if let Some(acc) = state.accounts.get(&to_address) {
+            acc.clone()
+        } else {
+            AccountState::default()
+        };
+
+        sender_account.balance -= self.value;
+        recipient_account.balance += self.value;
+
+        state.accounts.insert(sender_address, sender_account);
+        state.accounts.insert(to_address, recipient_account);
+    }
 }
 
 /// Equation 15
