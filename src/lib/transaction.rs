@@ -168,7 +168,7 @@ impl Transaction {
         // => checkpoint state σ0
 
         // gas available for the proceeding computation (Equation 63)
-        let g = self.gas_limit - self.intrinsic_gas();
+        let _g = self.gas_limit - self.intrinsic_gas();
 
         if self.to.is_some() {
             self.execute_message_call(state)

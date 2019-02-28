@@ -4,11 +4,15 @@
 
 ## Goals
 * implement Ethereum straight from the [Yellow Paper](https://github.com/ethereum/yellowpaper/)
-* (over)simplify things at first for a short and understandable implementation
-  - compatibility with real Ethereum: maybe later
+* (over)simplify things at first for a quick implementation
+  - no EVM/real contracts for now
+  - compatibility with real Ethereum: maybe later if at all
+* create a small browser game on top of it to teach the basics of Ethereum
 
 ## Current state
-There are structs that should cover all necessary data structures, but not much more. Still reading the Yellow Paper...
+There are structs that should cover most necessary data structures, and a bit of validatation and execution logic here and there. 
+
+Still reading the Yellow Paper...
 
 ## Difference to parity-ethereum
 `teth` uses many of the same utility crates as `parity-ethereum` (such as `rlp`, `patricia-trie`, `tiny-keccak` and `ethereum-types`), but otherwise aims to be an independent implementation of the specification. Also, `parity-ethereum` is quite large (~143k LoC) and has many options; `teth` will remain small and just implement the specification in a straight-forward manner.

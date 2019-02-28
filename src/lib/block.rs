@@ -1,8 +1,9 @@
-use ethereum_types::{Address, Bloom, H256, U256};
-use rlp::{Encodable, RlpStream, EMPTY_LIST_RLP};
-use tiny_keccak::keccak256;
-
+use std::collections::HashMap;
 use std::time::SystemTime;
+
+use ethereum_types::{Address, Bloom, H256, U256};
+use rlp::{encode, Encodable, RlpStream, EMPTY_LIST_RLP};
+use tiny_keccak::keccak256;
 
 use crate::lib::Transaction;
 
@@ -112,6 +113,20 @@ impl BlockHeader {
 
         valid
     }
+
+    pub fn to_rlp(&self) -> Vec<u8> {
+        encode(self)
+    }
+
+    /// Keccak 256-bit hash
+    pub fn hash(&self) -> H256 {
+        keccak256(&self.to_rlp()).into()
+    }
+
+    // TODO!: impl decode...
+    // pub fn from_rlp(data: &[u8]) -> Self {
+    //     decode(data).expect("could not decode")
+    // }
 }
 
 impl Encodable for BlockHeader {
@@ -214,6 +229,45 @@ impl Encodable for Block {
     }
 }
 
+/// TODO!: is this struct a good idea?
+pub struct BlockChain {
+    // TODO!: change value to RLP-encoded block? or only header?
+    /// key: Keccak Hash of BlockHeader
+    pub blocks: HashMap<H256, Block>,
+    pub latest_block_hash: H256,
+}
+
+#[allow(dead_code)]
+impl BlockChain {
+    fn new() -> Self {
+        let genesis_block = Block::genesis_block();
+        let genesis_hash = genesis_block.header.hash();
+        let mut blocks = HashMap::new();
+        blocks.insert(genesis_hash, genesis_block);
+        Self {
+            blocks,
+            latest_block_hash: genesis_hash,
+        }
+    }
+
+    fn add_block(&mut self, block: Block) {
+        let hash = block.header.hash();
+        self.blocks.insert(hash, block);
+        self.latest_block_hash = hash;
+    }
+
+    /// Section 10, Equation 153, 154
+    pub fn total_difficulty(&self) -> U256 {
+        let mut block = &self.blocks[&self.latest_block_hash];
+        let mut total_difficulty = block.header.difficulty;
+        while block.header.parent_hash != H256::zero() {
+            block = &self.blocks[&block.header.parent_hash];
+            total_difficulty += block.header.difficulty;
+        }
+        total_difficulty
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -235,5 +289,15 @@ mod tests {
     #[test]
     fn test_block() {
         let _b = Block::default();
+    }
+
+    #[test]
+    fn test_blockchain_total_difficulty() {
+        let mut block_chain = BlockChain::new();
+        assert_eq!(block_chain.total_difficulty(), (2 << 17).into());
+        let mut new_block = Block::genesis_block();
+        new_block.header.parent_hash = block_chain.latest_block_hash;
+        block_chain.add_block(new_block);
+        assert_eq!(block_chain.total_difficulty(), ((2 << 17) * 2).into());
     }
 }
