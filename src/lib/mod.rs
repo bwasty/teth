@@ -18,3 +18,5 @@ pub use self::options::*;
 
 mod feeschedule;
 pub use self::feeschedule::*;
+
+pub mod rpc;

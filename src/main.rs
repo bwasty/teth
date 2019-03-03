@@ -25,7 +25,8 @@ fn main() {
                 println!(
                     "not implemented yet, but here's the genesis block: {:?}",
                     Block::genesis_block()
-                )
+                );
+                rpc::start_server();
             } else {
                 // TODO!: connect to master node (teth.malkut.net / localhost -> arg...)
                 unimplemented!()
