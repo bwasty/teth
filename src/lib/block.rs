@@ -87,6 +87,14 @@ impl BlockHeader {
             && gas_limit >= 5000.into()
     }
 
+    /// The given **gasUsed must** correspond faithfully to the transactions listed: 
+    /// B<sub>H<sub>g</sub></sub>, the total gas used in the block, must be equal to the 
+    /// accumulated gas used according to the final transaction.
+    /// (Section 11.2, Equation 158)
+    pub fn validate_gas_used(&self) -> bool {
+        unimplemented!() // TODO!
+    }
+
     /// Equation 48
     pub fn validate_timestamp(timestamp: u64, parent_timestamp: u64) -> bool {
         timestamp > parent_timestamp
@@ -106,6 +114,7 @@ impl BlockHeader {
 
         valid &= self.gas_used <= self.gas_limit;
         valid &= Self::validate_gas_limit(self.gas_limit, parent.gas_limit);
+        // TODO!!: validate_gas_used? it's in a different equation...
         valid &= Self::validate_timestamp(self.timestamp, parent.timestamp);
         valid &= self.number == parent.number + 1;
 
