@@ -1,3 +1,4 @@
 # for more accurate tokei LoC badge
 *.md
 *.toml
+*.json
