@@ -47,8 +47,11 @@ impl WorldState {
 
         let mut state = Self::new();
         let account = AccountState::new(one_ether * 42u32);
-        state.accounts.insert(Address::from("0x96F1e2BdcB7645773D3DE58BcCB6223c44fA7D29"), account);
-        
+        state.accounts.insert(
+            Address::from("0x96F1e2BdcB7645773D3DE58BcCB6223c44fA7D29"),
+            account,
+        );
+
         let account = AccountState::new(one_ether * 420u32);
         state.accounts.insert(Address::random(), account);
 

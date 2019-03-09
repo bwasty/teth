@@ -98,7 +98,10 @@ mod tests {
     fn print_sizes() {
         // run with `cargo test -- --nocapture`
         println!("AccountState sizes:");
-        println!("struct:                   {:>3} bytes", std::mem::size_of::<AccountState>());
+        println!(
+            "struct:                   {:>3} bytes",
+            std::mem::size_of::<AccountState>()
+        );
         let mut account = AccountState::default();
         let rlp: Vec<u8> = rlp::encode(&account);
         println!("rlp default:              {:>3} bytes", rlp.len());
@@ -109,7 +112,7 @@ mod tests {
         println!("rlp with nonce,balance:   {:>3} bytes", rlp.len());
 
         account.balance = Wei::MAX;
-                let rlp: Vec<u8> = rlp::encode(&account);
+        let rlp: Vec<u8> = rlp::encode(&account);
         println!("rlp with max balance:     {:>3} bytes", rlp.len());
     }
 }

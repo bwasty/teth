@@ -25,6 +25,7 @@ fn main() {
                 let state = WorldState::genesis_state();
                 let mut block_chain = BlockChain::new();
                 block_chain.add_block(Block::genesis_block());
+                block_chain.add_block(Block::exodus_block());
                 rpc::start_server(state, block_chain);
             } else {
                 // TODO!: connect to master node (teth.malkut.net / localhost -> arg...)

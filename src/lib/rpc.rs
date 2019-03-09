@@ -1,18 +1,161 @@
-use jsonrpc_ws_server::jsonrpc_core::{IoHandler, Result};
-use jsonrpc_ws_server::ServerBuilder;
+use ethereum_types::{Address, H256, U256};
 use jsonrpc_derive::rpc;
+use jsonrpc_ws_server::jsonrpc_core::{Error, IoHandler, Result};
+use jsonrpc_ws_server::ServerBuilder;
+use serde::Serialize;
 
-use ethereum_types::Address;
-use crate::lib::{Wei, WorldState, BlockChain};
+use crate::lib::{Block, BlockChain, Transaction, Wei, WorldState};
+
+/// Source: https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockResponse {
+    /// The block number. `None` when it's a pending block.
+    pub number: Option<u64>,
+    pub hash: Option<H256>,
+    pub parent_hash: H256,
+    /// Hash of the generated proof-of-work. `None` when its pending block
+    pub nonce: Option<u64>,
+
+    // TODO!!: all fields...
+    /// The address of the beneficiary to whom the mining rewards were given.
+    pub miner: Address,
+    pub difficulty: U256,
+    pub total_difficulty: U256,
+    pub extra_data: [u8; 32],
+    /// The size of this block in bytes
+    pub size: usize,
+    pub gas_limit: U256,
+    pub gas_used: U256,
+    pub timestamp: u64,
+    #[serde(rename = "transactions", skip_serializing_if = "Vec::is_empty")]
+    pub full_transactions: Vec<TransactionResponse>,
+    #[serde(rename = "transactions", skip_serializing_if = "Vec::is_empty")]
+    pub transaction_hashes: Vec<H256>,
+}
+
+impl BlockResponse {
+    fn new(block: &Block, block_chain: &BlockChain, include_full_transactions: bool) -> Self {
+        let header = &block.header;
+        let mut response = Self {
+            number: Some(header.number),
+            hash: Some(header.hash()),
+            parent_hash: header.parent_hash,
+            nonce: Some(header.nonce),
+            miner: header.beneficiary,
+            difficulty: header.difficulty,
+            total_difficulty: block_chain.total_difficulty(&block_chain.latest_block_hash),
+            extra_data: header.extra_data,
+            size: block.to_rlp().len(),
+            gas_limit: header.gas_limit,
+            gas_used: header.gas_used,
+            timestamp: header.timestamp,
+            full_transactions: vec![],
+            transaction_hashes: vec![],
+        };
+        if include_full_transactions {
+            response.full_transactions = block
+                .transactions
+                .iter()
+                .map(|t| TransactionResponse::new(t, Some(block)))
+                .collect();
+            dbg!(&response.full_transactions);
+        } else {
+            response.transaction_hashes = block.transactions.iter().map(|t| t.hash()).collect();
+            dbg!(&response.transaction_hashes);
+        }
+        response
+    }
+}
+
+// type TransactionResponseShort = BlockResponse<H256>;
+// type BlockResponseFull = BlockResponse<TransactionResponse>;
+
+/// Source: https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
+#[derive(Serialize, Default, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionResponse {
+    /// Hash of the block where this transaction was in. `None` when it's pending.
+    pub block_hash: Option<H256>,
+    /// Block number where this transaction was in. `None` when it's pending.
+    pub number: Option<u64>,
+    /// Address of the sender.
+    pub from: Address,
+    /// Gas provided by the sender.
+    pub gas: Wei,
+    /// Gas price provided by the sender in Wei
+    pub gas_price: Wei,
+    /// Hash of the transaction.
+    pub hash: H256,
+    /// The data sent along with the transaction.
+    pub input: Option<Vec<u8>>,
+    /// The number of transactions made by the sender prior to this one.
+    pub nonce: U256,
+    /// Address of the receiver. `None` when it's a contract creation transaction.
+    pub to: Option<Address>,
+    /// Integer of the transaction's index position in the block. `None` when it's pending.
+    pub transaction_index: Option<usize>,
+    /// Value transferred in Wei.
+    pub value: Wei,
+    /// ECDSA recovery id
+    pub v: u8,
+    /// ECDSA signature r
+    pub r: U256,
+    /// ECDSA signature s
+    pub s: U256,
+}
+
+impl TransactionResponse {
+    pub fn new(transaction: &Transaction, block: Option<&Block>) -> Self {
+        let mut response = Self {
+            from: transaction.sender(),
+            gas: transaction.gas_limit,
+            gas_price: transaction.gas_price,
+            hash: transaction.hash(),
+            input: transaction.data.clone(),
+            nonce: transaction.nonce,
+            to: transaction.to,
+            value: transaction.value,
+            v: transaction.signature.v,
+            r: transaction.signature.r,
+            s: transaction.signature.s,
+            ..Self::default()
+        };
+
+        if let Some(block) = block {
+            let header = &block.header;
+            response.block_hash = Some(header.hash());
+            response.number = Some(header.number);
+            // TODO!: optimize?
+            response.transaction_index = block
+                .transactions
+                .iter()
+                .position(|t| t.hash() == transaction.hash())
+        }
+
+        response
+    }
+}
 
 #[rpc]
 pub trait Rpc {
     #[rpc(name = "eth_getBalance")]
-    fn get_balance(&self, address: Address, block: String) -> Result<Wei>;
+    fn get_balance(&self, address: Address, block_number: String) -> Result<Wei>;
+
+    #[rpc(name = "eth_getBlockByNumber")]
+    fn get_block_by_number(
+        &self,
+        number: String,
+        return_transaction_objects: bool,
+    ) -> Result<BlockResponse>;
 
     // TODO: limit, offset?
     #[rpc(name = "teth_topAccounts")]
-    fn top_accounts(&self, limit: Option<usize>, offset: Option<usize>) -> Result<Vec<(Address, Wei)>>;
+    fn top_accounts(
+        &self,
+        limit: Option<usize>,
+        offset: Option<usize>,
+    ) -> Result<Vec<(Address, Wei)>>;
 }
 
 struct RpcImpl {
@@ -39,8 +182,37 @@ impl Rpc for RpcImpl {
         }
     }
 
-    fn top_accounts(&self, offset: Option<usize>, limit: Option<usize>) -> Result<Vec<(Address, Wei)>> {
-        let mut balances: Vec<(Address, Wei)> = self.world_state.accounts.iter()
+    fn get_block_by_number(
+        &self,
+        number: String,
+        return_transaction_objects: bool,
+    ) -> Result<BlockResponse> {
+        match number.as_ref() {
+            "earliest" => Err(Error::internal_error()), // not implemented yet
+            "latest" => {
+                let block = &self.block_chain.blocks[&self.block_chain.latest_block_hash];
+                Ok(BlockResponse::new(
+                    &block,
+                    &self.block_chain,
+                    return_transaction_objects,
+                ))
+            }
+            "pending" => Err(Error::internal_error()), // not implemented yet,
+            _ => Err(Error::internal_error()),         // not implemented yet
+        }
+        // let block = self.block_chain.blocks.values()
+        //     .find(|b| b.number)
+    }
+
+    fn top_accounts(
+        &self,
+        offset: Option<usize>,
+        limit: Option<usize>,
+    ) -> Result<Vec<(Address, Wei)>> {
+        let mut balances: Vec<(Address, Wei)> = self
+            .world_state
+            .accounts
+            .iter()
             .map(|(address, account)| (*address, account.balance))
             .collect();
         balances.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap()); // desc by balance
@@ -48,7 +220,7 @@ impl Rpc for RpcImpl {
         let limit = limit.unwrap_or(5);
         let offset = offset.unwrap_or(0);
 
-        Ok(balances[offset..offset+limit].to_vec())
+        Ok(balances[offset..offset + limit].to_vec())
     }
 }
 

@@ -22,4 +22,4 @@ hash-db = "0.11.0"
 jsonrpc-ws-server = "10.1.0"
 jsonrpc-derive = "10.1.0"
 jsonrpc-core = "10.1.0"
-serde = "1.0.89"
+serde = {version = "1.0.89", features = ["derive"]}

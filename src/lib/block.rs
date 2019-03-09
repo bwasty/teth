@@ -87,8 +87,8 @@ impl BlockHeader {
             && gas_limit >= 5000.into()
     }
 
-    /// The given **gasUsed must** correspond faithfully to the transactions listed: 
-    /// B<sub>H<sub>g</sub></sub>, the total gas used in the block, must be equal to the 
+    /// The given **gasUsed must** correspond faithfully to the transactions listed:
+    /// B<sub>H<sub>g</sub></sub>, the total gas used in the block, must be equal to the
     /// accumulated gas used according to the final transaction.
     /// (Section 11.2, Equation 158)
     pub fn validate_gas_used(&self) -> bool {
@@ -224,6 +224,54 @@ impl Block {
             ommers: vec![],
         }
     }
+
+    /// Test block with transactions and genesis block as parent
+    pub fn exodus_block() -> Self {
+        let genesis = Self::genesis_block();
+        let transaction = Transaction {
+            nonce: 1.into(),
+            gas_price: 2.into(),
+            gas_limit: 84_000.into(),
+            to: Some(Address::random()),
+            value: 42_000.into(),
+            data: Some(vec![]),
+            ..Transaction::default()
+        };
+        let gas_used = transaction.intrinsic_gas();
+        Block {
+            header: BlockHeader {
+                parent_hash: genesis.header.hash(),
+                ommers_hash: keccak256(&EMPTY_LIST_RLP).into(),
+                beneficiary: Address::zero(),
+                state_root: H256::zero(),
+                transactions_root: H256::zero(),
+                receipts_root: H256::zero(),
+                logs_bloom: Bloom::zero(),
+                difficulty: (2 << 17).into(),
+                number: 1,
+                gas_limit: 3_141_592.into(),
+                gas_used: gas_used.into(),
+                timestamp: SystemTime::now()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+                extra_data: [0; 32],
+                mix_hash: H256::zero(),
+                nonce: 42,
+            },
+            transactions: vec![transaction],
+            ommers: vec![],
+        }
+    }
+
+    pub fn to_rlp(&self) -> Vec<u8> {
+        encode(self)
+    }
+
+    /// Keccak 256-bit hash
+    pub fn hash(&self) -> H256 {
+        keccak256(&self.to_rlp()).into()
+    }
 }
 
 impl Encodable for Block {
@@ -267,8 +315,8 @@ impl BlockChain {
     }
 
     /// Section 10, Equation 153, 154
-    pub fn total_difficulty(&self) -> U256 {
-        let mut block = &self.blocks[&self.latest_block_hash];
+    pub fn total_difficulty(&self, block_hash: &H256) -> U256 {
+        let mut block = &self.blocks[block_hash];
         let mut total_difficulty = block.header.difficulty;
         while block.header.parent_hash != H256::zero() {
             block = &self.blocks[&block.header.parent_hash];
@@ -315,7 +363,10 @@ mod tests {
     fn print_blockheader_sizes() {
         // run with `cargo test -- --nocapture size --test-threads=1`
         println!("\nBlockHeader sizes:");
-        println!("struct:                   {:>3} bytes", std::mem::size_of::<BlockHeader>());
+        println!(
+            "struct:                   {:>3} bytes",
+            std::mem::size_of::<BlockHeader>()
+        );
         let mut blockheader = BlockHeader::default();
         let rlp: Vec<u8> = rlp::encode(&blockheader);
         println!("rlp default:              {:>3} bytes", rlp.len());

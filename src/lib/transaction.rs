@@ -1,6 +1,7 @@
-use ethereum_types::{Address, U256};
+use ethereum_types::{Address, H256, U256};
 use lazy_static::lazy_static;
-use rlp::{Encodable, RlpStream};
+use rlp::{encode, Encodable, RlpStream};
+use tiny_keccak::keccak256;
 
 use crate::lib::{AccountState, Wei, WorldState, FEES};
 
@@ -96,7 +97,17 @@ impl Transaction {
     /// signature fields) as the datum to sign. For the present we simply assert that the sender of a
     /// given transaction T can be represented with S(T).
     pub fn sender(&self) -> Address {
-        unimplemented!() // TODO!
+        // unimplemented!() // TODO!!!!
+        Address::random()
+    }
+
+    pub fn to_rlp(&self) -> Vec<u8> {
+        encode(self)
+    }
+
+    /// Keccak 256-bit hash
+    pub fn hash(&self) -> H256 {
+        keccak256(&self.to_rlp()).into()
     }
 
     /// Section 6 (beginning)
@@ -255,7 +266,10 @@ mod tests {
     fn print_sizes() {
         // run with `cargo test -- --nocapture`
         println!("Transaction sizes:");
-        println!("struct:                   {:>3} bytes", std::mem::size_of::<Transaction>());
+        println!(
+            "struct:                   {:>3} bytes",
+            std::mem::size_of::<Transaction>()
+        );
         let mut transaction = Transaction::default();
         let rlp: Vec<u8> = rlp::encode(&transaction);
         println!("rlp default:              {:>3} bytes", rlp.len());
