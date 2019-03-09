@@ -8,6 +8,7 @@ use ethereum_types::Address;
 // use hash_db::HashDB;
 
 use crate::lib::accountstate::AccountState;
+use crate::lib::Wei;
 
 /// σ
 ///
@@ -42,9 +43,24 @@ impl WorldState {
     }
 
     pub fn genesis_state() -> Self {
+        let one_ether = Wei::from(10).pow(18.into());
+
         let mut state = Self::new();
-        let account = AccountState::new(42.into());
+        let account = AccountState::new(one_ether * 42u32);
         state.accounts.insert(Address::from("0x96F1e2BdcB7645773D3DE58BcCB6223c44fA7D29"), account);
+        
+        let account = AccountState::new(one_ether * 420u32);
+        state.accounts.insert(Address::random(), account);
+
+        let account = AccountState::new(one_ether * 4200u32);
+        state.accounts.insert(Address::random(), account);
+
+        let account = AccountState::new(one_ether * 42000u32);
+        state.accounts.insert(Address::random(), account);
+
+        let account = AccountState::new(one_ether * 420_000u32);
+        state.accounts.insert(Address::random(), account);
+
         state
     }
 }

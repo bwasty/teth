@@ -12,7 +12,7 @@ pub trait Rpc {
 
     // TODO: limit, offset?
     #[rpc(name = "teth_topAccounts")]
-    fn top_accounts(&self) -> Result<Vec<(Address, Wei)>>;
+    fn top_accounts(&self, limit: Option<usize>, offset: Option<usize>) -> Result<Vec<(Address, Wei)>>;
 }
 
 struct RpcImpl {
@@ -39,8 +39,16 @@ impl Rpc for RpcImpl {
         }
     }
 
-    fn top_accounts(&self) -> Result<Vec<(Address, Wei)>> {
-        unimplemented!()
+    fn top_accounts(&self, offset: Option<usize>, limit: Option<usize>) -> Result<Vec<(Address, Wei)>> {
+        let mut balances: Vec<(Address, Wei)> = self.world_state.accounts.iter()
+            .map(|(address, account)| (*address, account.balance))
+            .collect();
+        balances.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap()); // desc by balance
+
+        let limit = limit.unwrap_or(5);
+        let offset = offset.unwrap_or(0);
+
+        Ok(balances[offset..offset+limit].to_vec())
     }
 }
 
