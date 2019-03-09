@@ -39,6 +39,15 @@ impl Default for AccountState {
     }
 }
 
+impl AccountState {
+    pub fn new(balance: Wei) -> Self {
+        Self {
+            balance,
+            ..Self::default()
+        }
+    }
+}
+
 #[allow(dead_code)]
 impl AccountState {
     /// If the codeHash field is the Keccak-256 hash of the empty string, i.e. σ[a]<sub>c</sub> = KEC(()),

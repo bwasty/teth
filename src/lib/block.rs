@@ -239,6 +239,7 @@ impl Encodable for Block {
 }
 
 /// TODO!: is this struct a good idea?
+#[derive(Default)]
 pub struct BlockChain {
     // TODO!: change value to RLP-encoded block? or only header?
     /// key: Keccak Hash of BlockHeader
@@ -248,7 +249,7 @@ pub struct BlockChain {
 
 #[allow(dead_code)]
 impl BlockChain {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let genesis_block = Block::genesis_block();
         let genesis_hash = genesis_block.header.hash();
         let mut blocks = HashMap::new();
@@ -259,7 +260,7 @@ impl BlockChain {
         }
     }
 
-    fn add_block(&mut self, block: Block) {
+    pub fn add_block(&mut self, block: Block) {
         let hash = block.header.hash();
         self.blocks.insert(hash, block);
         self.latest_block_hash = hash;

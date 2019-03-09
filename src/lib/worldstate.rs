@@ -40,6 +40,13 @@ impl WorldState {
     pub fn is_account_dead(&self, account: &AccountState) -> bool {
         account.is_empty() || !self.accounts.values().any(|x| x == account)
     }
+
+    pub fn genesis_state() -> Self {
+        let mut state = Self::new();
+        let account = AccountState::new(42.into());
+        state.accounts.insert(Address::from("0x96F1e2BdcB7645773D3DE58BcCB6223c44fA7D29"), account);
+        state
+    }
 }
 
 #[cfg(test)]

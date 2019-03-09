@@ -22,11 +22,10 @@ fn main() {
     match opt.commands {
         SubCommand::Node { bootstrap } => {
             if bootstrap {
-                // println!(
-                //     "not implemented yet, but here's the genesis block: {:?}",
-                //     Block::genesis_block()
-                // );
-                rpc::start_server();
+                let state = WorldState::genesis_state();
+                let mut block_chain = BlockChain::new();
+                block_chain.add_block(Block::genesis_block());
+                rpc::start_server(state, block_chain);
             } else {
                 // TODO!: connect to master node (teth.malkut.net / localhost -> arg...)
                 unimplemented!()
