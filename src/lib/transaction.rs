@@ -250,4 +250,22 @@ mod tests {
         let s1 = sig(27, 1.into(), 1.into());
         assert!(s1.is_valid())
     }
+
+    #[test]
+    fn print_sizes() {
+        // run with `cargo test -- --nocapture`
+        println!("Transaction sizes:");
+        println!("struct:                   {:>3} bytes", std::mem::size_of::<Transaction>());
+        let mut transaction = Transaction::default();
+        let rlp: Vec<u8> = rlp::encode(&transaction);
+        println!("rlp default:              {:>3} bytes", rlp.len());
+
+        transaction.nonce = 1234.into();
+        transaction.gas_price = 21000.into();
+        transaction.gas_limit = 3141592.into();
+        transaction.to = Some(Address::random());
+        transaction.value = Wei::from_dec_str("100000000000000000000").unwrap(); // 100 eth
+        let rlp: Vec<u8> = rlp::encode(&transaction);
+        println!("rlp with some values:     {:>3} bytes", rlp.len());
+    }
 }

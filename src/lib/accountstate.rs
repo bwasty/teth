@@ -84,4 +84,23 @@ mod tests {
         assert!(acc.has_code());
         assert!(!acc.is_empty());
     }
+
+    #[test]
+    fn print_sizes() {
+        // run with `cargo test -- --nocapture`
+        println!("AccountState sizes:");
+        println!("struct:                   {:>3} bytes", std::mem::size_of::<AccountState>());
+        let mut account = AccountState::default();
+        let rlp: Vec<u8> = rlp::encode(&account);
+        println!("rlp default:              {:>3} bytes", rlp.len());
+
+        account.nonce = 1234.into();
+        account.balance = Wei::from_dec_str("100000000000000000000").unwrap(); // 100 eth
+        let rlp: Vec<u8> = rlp::encode(&account);
+        println!("rlp with nonce,balance:   {:>3} bytes", rlp.len());
+
+        account.balance = Wei::MAX;
+                let rlp: Vec<u8> = rlp::encode(&account);
+        println!("rlp with max balance:     {:>3} bytes", rlp.len());
+    }
 }

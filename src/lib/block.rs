@@ -309,4 +309,14 @@ mod tests {
         block_chain.add_block(new_block);
         assert_eq!(block_chain.total_difficulty(), ((2 << 17) * 2).into());
     }
+
+    #[test]
+    fn print_blockheader_sizes() {
+        // run with `cargo test -- --nocapture size --test-threads=1`
+        println!("\nBlockHeader sizes:");
+        println!("struct:                   {:>3} bytes", std::mem::size_of::<BlockHeader>());
+        let mut blockheader = BlockHeader::default();
+        let rlp: Vec<u8> = rlp::encode(&blockheader);
+        println!("rlp default:              {:>3} bytes", rlp.len());
+    }
 }
