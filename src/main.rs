@@ -1,4 +1,4 @@
-//! Toy Ethereum client closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/) ([PDF](https://ethereum.github.io/yellowpaper/paper.pdf)).
+//! Toy Ethereum implementation closely following the [Yellow Paper](https://github.com/ethereum/yellowpaper/) ([PDF](https://ethereum.github.io/yellowpaper/paper.pdf)).
 //! Structs, fields and methods are annotated with their formal definition where applicable.
 //! 
 //! Currently implements a small subset of the [JSON-RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) 

@@ -36,7 +36,7 @@ class App extends Component<{}, AppState> {
 
     this.state = { 
       account, 
-      balance: null, 
+      balance: "0", 
       topAccounts: [],
       latestBlocks: [],
     };

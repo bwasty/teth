@@ -1,4 +1,4 @@
-# teth - Toy Ethereum Client
+# teth - Toy Ethereum implementation
 [![Docs](https://img.shields.io/badge/docs-github.io-informational.svg)](https://bwasty.github.io/teth/teth/index.html)
 [![Actions Status](https://wdp9fww0r9.execute-api.us-west-2.amazonaws.com/production/badge/bwasty/teth?style=flat)](https://github.com/bwasty/teth/actions) [![](https://tokei.rs/b1/github/bwasty/teth)](https://github.com/Aaronepower/tokei) [![](https://tokei.rs/b1/github/bwasty/teth?category=comments)](https://github.com/Aaronepower/tokei) 
 
