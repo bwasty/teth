@@ -351,11 +351,11 @@ mod tests {
     #[test]
     fn test_blockchain_total_difficulty() {
         let mut block_chain = BlockChain::new();
-        assert_eq!(block_chain.total_difficulty(), (2 << 17).into());
+        assert_eq!(block_chain.total_difficulty(&block_chain.latest_block_hash), (2 << 17).into());
         let mut new_block = Block::genesis_block();
         new_block.header.parent_hash = block_chain.latest_block_hash;
         block_chain.add_block(new_block);
-        assert_eq!(block_chain.total_difficulty(), ((2 << 17) * 2).into());
+        assert_eq!(block_chain.total_difficulty(&block_chain.latest_block_hash), ((2 << 17) * 2).into());
     }
 
     #[test]
@@ -366,7 +366,7 @@ mod tests {
             "struct:                   {:>3} bytes",
             std::mem::size_of::<BlockHeader>()
         );
-        let mut blockheader = BlockHeader::default();
+        let blockheader = BlockHeader::default();
         let rlp: Vec<u8> = rlp::encode(&blockheader);
         println!("rlp default:              {:>3} bytes", rlp.len());
     }
