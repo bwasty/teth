@@ -10,9 +10,7 @@
 * create a small browser game on top of it to teach the basics of Ethereum
 
 ## Current state
-There are structs that should cover most necessary data structures, and a bit of validatation and execution logic here and there. 
-
-Still reading the Yellow Paper...
+There are structs that should cover most necessary data structures, and a bit of validatation and execution logic here and there. Almost ready to send transactions...
 
 ## Difference to parity-ethereum
 `teth` uses many of the same utility crates as `parity-ethereum` (such as `rlp`, `patricia-trie`, `tiny-keccak` and `ethereum-types`), but otherwise aims to be an independent implementation of the specification. Also, `parity-ethereum` is quite large (~143k LoC) and has many options; `teth` will remain small and just implement the specification in a straight-forward manner.

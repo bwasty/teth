@@ -30,6 +30,8 @@ div.innerHTML = `Address: ${account.address}, `;
     console.log(topAccounts.map(([address, balance]) => {
         return {address: address, balance: web3.utils.fromWei(balance)}
     }))
+
+    // await provider.send('teth_faucet', [account.address]);
 })()
 
 // const wallet = web3.eth.accounts.wallet;

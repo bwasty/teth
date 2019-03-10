@@ -286,7 +286,6 @@ impl Encodable for Block {
     }
 }
 
-/// TODO!: is this struct a good idea?
 #[derive(Default)]
 pub struct BlockChain {
     // TODO!: change value to RLP-encoded block? or only header?

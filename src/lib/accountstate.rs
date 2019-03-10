@@ -2,7 +2,7 @@ use ethereum_types::{H256, U256};
 use rlp::{Encodable, RlpStream};
 use tiny_keccak::keccak256;
 
-use crate::lib::types::Wei;
+use crate::lib::utils::Wei;
 
 /// σ[a]
 #[derive(Debug, PartialEq, Clone)]

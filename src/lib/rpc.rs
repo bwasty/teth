@@ -1,10 +1,14 @@
-use ethereum_types::{Address, H256, U256};
+use std::sync::Mutex;
+
+use ethereum_types::{Address, Bloom, H256, U256};
 use jsonrpc_derive::rpc;
 use jsonrpc_ws_server::jsonrpc_core::{Error, IoHandler, Result};
 use jsonrpc_ws_server::ServerBuilder;
 use serde::Serialize;
 
-use crate::lib::{Block, BlockChain, Transaction, Wei, WorldState};
+use crate::lib::{
+    AccountState, Block, BlockChain, BlockHeader, Transaction, Wei, WorldState, ONE_ETHER,
+};
 
 /// Source: https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
 #[derive(Serialize, Debug)]
@@ -16,8 +20,14 @@ pub struct BlockResponse {
     pub parent_hash: H256,
     /// Hash of the generated proof-of-work. `None` when its pending block
     pub nonce: Option<u64>,
-
-    // TODO!!: all fields...
+    // /// SHA3 of the uncles data in the block.
+    // pub sha3_uncles: H256,
+    /// The bloom filter for the logs of the block. `None` when its pending block.
+    pub logs_bloom: Option<Bloom>,
+    /// The root of the transaction trie of the block.
+    pub transactions_root: H256,
+    /// The root of the receipts trie of the block.
+    pub receipts_root: H256,
     /// The address of the beneficiary to whom the mining rewards were given.
     pub miner: Address,
     pub difficulty: U256,
@@ -32,6 +42,8 @@ pub struct BlockResponse {
     pub full_transactions: Vec<TransactionResponse>,
     #[serde(rename = "transactions", skip_serializing_if = "Vec::is_empty")]
     pub transaction_hashes: Vec<H256>,
+    /// Array of uncle hashes
+    pub uncles: Vec<H256>,
 }
 
 impl BlockResponse {
@@ -42,6 +54,10 @@ impl BlockResponse {
             hash: Some(header.hash()),
             parent_hash: header.parent_hash,
             nonce: Some(header.nonce),
+            // sha3_uncles: keccak256(&encode(&block.ommers)).into(),
+            logs_bloom: Some(header.logs_bloom), // TODO!: None for pending block..
+            transactions_root: header.transactions_root,
+            receipts_root: header.receipts_root,
             miner: header.beneficiary,
             difficulty: header.difficulty,
             total_difficulty: block_chain.total_difficulty(&block_chain.latest_block_hash),
@@ -52,6 +68,7 @@ impl BlockResponse {
             timestamp: header.timestamp,
             full_transactions: vec![],
             transaction_hashes: vec![],
+            uncles: block.ommers.iter().map(BlockHeader::hash).collect(),
         };
         if include_full_transactions {
             response.full_transactions = block
@@ -149,17 +166,19 @@ pub trait Rpc {
         return_transaction_objects: bool,
     ) -> Result<BlockResponse>;
 
-    // TODO: limit, offset?
     #[rpc(name = "teth_topAccounts")]
     fn top_accounts(
         &self,
         limit: Option<usize>,
         offset: Option<usize>,
     ) -> Result<Vec<(Address, Wei)>>;
+
+    #[rpc(name = "teth_faucet")]
+    fn faucet(&self, address: Address) -> Result<bool>;
 }
 
 struct RpcImpl {
-    world_state: WorldState,
+    world_state: Mutex<WorldState>,
     #[allow(dead_code)]
     block_chain: BlockChain,
 }
@@ -167,14 +186,15 @@ struct RpcImpl {
 impl RpcImpl {
     pub fn new(world_state: WorldState, block_chain: BlockChain) -> Self {
         Self {
-            world_state,
+            world_state: Mutex::new(world_state),
             block_chain,
         }
     }
 }
 impl Rpc for RpcImpl {
     fn get_balance(&self, address: Address, _block: String) -> Result<Wei> {
-        let account = self.world_state.accounts.get(&address);
+        let state = self.world_state.lock().unwrap();
+        let account = state.accounts.get(&address);
         if let Some(account) = account {
             Ok(account.balance)
         } else {
@@ -209,8 +229,8 @@ impl Rpc for RpcImpl {
         offset: Option<usize>,
         limit: Option<usize>,
     ) -> Result<Vec<(Address, Wei)>> {
-        let mut balances: Vec<(Address, Wei)> = self
-            .world_state
+        let state = self.world_state.lock().unwrap();
+        let mut balances: Vec<(Address, Wei)> = state
             .accounts
             .iter()
             .map(|(address, account)| (*address, account.balance))
@@ -221,6 +241,25 @@ impl Rpc for RpcImpl {
         let offset = offset.unwrap_or(0);
 
         Ok(balances[offset..offset + limit].to_vec())
+    }
+
+    fn faucet(&self, address: Address) -> Result<bool> {
+        // TODO!: require signed message
+        let mut state = self.world_state.lock().unwrap();
+        let mut account = state
+            .accounts
+            .get(&address)
+            .cloned()
+            .unwrap_or_else(AccountState::default);
+
+        if account.balance == 0.into() {
+            // TODO!: make it a transaction...
+            account.balance = *ONE_ETHER;
+            state.accounts.insert(address, account);
+            Ok(true)
+        } else {
+            Err(Error::invalid_params("Account must be empty"))
+        }
     }
 }
 
