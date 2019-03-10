@@ -58,13 +58,27 @@ class App extends Component<{}, AppState> {
     })
 
     web3.eth.getBlock('latest').then(block => {
-      console.log(block)
       this.setState({latestBlocks: [block]})
     })
+
+    // TODO!: HACK for updating connection string...
+    setInterval(() => this.forceUpdate(), 2000);
   }
+  connectionString() {
+    let provider = web3.currentProvider as WebsocketProvider;
+    if (provider.isConnecting()) {
+      return ""
+    }
+    if (provider.connected) {
+      return <i style={{float: 'right', fontSize: 'smaller', color: 'green'}}>Connected to {provider.host}</i>
+    }
+    return <i style={{float: 'right', fontSize: 'smaller', color: 'red'}}>Disconnected</i>
+  }
+
   render() {
     return (
       <div>
+        {this.connectionString()}
         <b>Address:</b> {this.state.account.address} 
         <span style={{color: "gray", fontSize: "smaller"}}>(generated in-memory wallet)</span>
         <br />
@@ -78,7 +92,7 @@ class App extends Component<{}, AppState> {
         <b>Latest block(s):</b>
         {this.state.latestBlocks.map(block => {
           let date = new Date(block.timestamp * 1000)
-          return <div>
+          return <div key={block.number}>
             #{block.number} - {block.transactions.length} transactions - {date.toLocaleDateString()} {date.toLocaleTimeString()}
           </div>
         })}
