@@ -1,0 +1,4 @@
+teth.malkut.net:443
+root ./dist
+gzip
+log ../../teth-access.log

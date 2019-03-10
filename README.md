@@ -32,9 +32,6 @@ FLAGS:
 
 SUBCOMMANDS:
     node           Run a node.
-    account        Query information about accounts.
-    transaction    Query information about transactions.
-    block          Query information about blocks.
     help           Prints this message or the help of the given subcommand(s)
 ```
 `teth help node`:
@@ -46,20 +43,6 @@ FLAGS:
         --bootstrap    Bootstrap the chain (with the genesis block).
     -h, --help         Prints help information
 ```
-`teth help account`:
-```
-USAGE:
-    teth account <SUBCOMMAND>
-
-FLAGS:
-    -h, --help    Prints help information
-
-SUBCOMMANDS:
-    help    Prints this message or the help of the given subcommand(s)
-    list    List accounts, ordered by balance (descending)
-    show    Show details of account (balance etc.)
-```
-
 
 ## Development
 
