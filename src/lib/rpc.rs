@@ -76,17 +76,12 @@ impl BlockResponse {
                 .iter()
                 .map(|t| TransactionResponse::new(t, Some(block)))
                 .collect();
-            dbg!(&response.full_transactions);
         } else {
             response.transaction_hashes = block.transactions.iter().map(|t| t.hash()).collect();
-            dbg!(&response.transaction_hashes);
         }
         response
     }
 }
-
-// type TransactionResponseShort = BlockResponse<H256>;
-// type BlockResponseFull = BlockResponse<TransactionResponse>;
 
 /// Source: https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 #[derive(Serialize, Default, Debug)]
@@ -154,11 +149,16 @@ impl TransactionResponse {
     }
 }
 
+/// Trait for RPC methods, using jsonrpc-derive.
 #[rpc]
 pub trait Rpc {
+    /// Returns the balance of the account of given address. See also
+    /// [eth_getBalance](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getbalance).
     #[rpc(name = "eth_getBalance")]
     fn get_balance(&self, address: Address, block_number: String) -> Result<Wei>;
 
+    /// Returns information about a block by block number. See also
+    /// [eth_getBlockByNumber](https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber).
     #[rpc(name = "eth_getBlockByNumber")]
     fn get_block_by_number(
         &self,
@@ -166,6 +166,7 @@ pub trait Rpc {
         return_transaction_objects: bool,
     ) -> Result<BlockResponse>;
 
+    /// Non-standard RPC method to the 'top' accounts by balance. 
     #[rpc(name = "teth_topAccounts")]
     fn top_accounts(
         &self,
@@ -173,13 +174,21 @@ pub trait Rpc {
         offset: Option<usize>,
     ) -> Result<Vec<(Address, Wei)>>;
 
+    /// Non-standard RPC method to get one Ether. 
+    /// Works only when the account has no balance.
     #[rpc(name = "teth_faucet")]
     fn faucet(&self, address: Address) -> Result<bool>;
+
+    #[rpc(name = "eth_syncing")]
+    fn syncing(&self) -> Result<bool>;
+
+    // #[rpc(name = "eth_subscribe")]
+    // fn subscribe(&self, type_: String) -> Result<()>;
 }
 
-struct RpcImpl {
+/// See `Rpc` trait for method descriptions.
+pub struct RpcImpl {
     world_state: Mutex<WorldState>,
-    #[allow(dead_code)]
     block_chain: BlockChain,
 }
 
@@ -261,9 +270,17 @@ impl Rpc for RpcImpl {
             Err(Error::invalid_params("Account must be empty"))
         }
     }
+
+    fn syncing(&self) -> Result<bool> {
+        Ok(false)
+    }
+
+    // fn subscribe(&self, _type: String) -> Result<()> {
+    //     Err(Error::invalid_request())
+    // }
 }
 
-pub fn start_server(world_state: WorldState, block_chain: BlockChain) {
+pub fn start_websocket_server(world_state: WorldState, block_chain: BlockChain) {
     let mut io = IoHandler::new();
     let rpc = RpcImpl::new(world_state, block_chain);
     io.extend_with(rpc.to_delegate());

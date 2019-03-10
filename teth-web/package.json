@@ -19,8 +19,11 @@
     "web3": "^1.0.0-beta.48"
   },
   "dependencies": {
+    "@parity/api": "^5.0.1",
+    "@parity/light.js": "^5.0.1",
     "bulma": "^0.7.4",
     "react": "^16.8.4",
-    "react-dom": "^16.8.4"
+    "react-dom": "^16.8.4",
+    "rxjs": "^6.4.0"
   }
 }
