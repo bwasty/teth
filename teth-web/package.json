@@ -11,8 +11,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/react": "^16.8.7",
+    "@types/react-dom": "^16.8.2",
     "parcel-bundler": "^1.11.0",
+    "sass": "^1.17.2",
     "typescript": "^3.3.3333",
     "web3": "^1.0.0-beta.48"
+  },
+  "dependencies": {
+    "bulma": "^0.7.4",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
   }
 }

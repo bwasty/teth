@@ -1,0 +1,11 @@
+$navbar-breakpoint: 400px; 
+@import "./node_modules/bulma/bulma";
+
+@import url('https://fonts.googleapis.com/css?family=Work+Sans');
+
+.teth {
+    font-family: 'Work Sans', sans-serif;
+    font-weight: bold;
+    font-size: larger;
+    color: #026AD7 !important;
+}

@@ -1,16 +1,43 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="./index.scss">
 </head>
 
 <body>
+  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <div class="navbar-item teth">
+        teth
+      </div>
+      <div class="navbar-item" style="font-size: smaller">
+        toy ethereum client
+      </div>
+
+      <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <div id="navbarMenu" class="navbar-menu">
+      <div class="navbar-start"></div>
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/bwasty/teth">
+          GitHub
+        </a>
+        <a class="navbar-item" href="/docs">
+          Docs
+        </a>
+      </div>
+    </div>
+  </nav>
+
   <div id="app"></div>
-  <script src="./index.ts"></script>
+  <script src="./index.tsx"></script>
 </body>
 
 </html>
