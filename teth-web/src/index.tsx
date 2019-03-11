@@ -80,7 +80,7 @@ class App extends Component<{}, AppState> {
   }
   async updateTopAccounts() {
     const provider = web3.currentProvider as WebsocketProvider;
-    let topAccounts = await provider.send('teth_topAccounts', []) as string[]
+    let topAccounts = await provider.send('teth_topAccounts', [0, 6]) as string[]
     this.setState({ topAccounts: topAccounts.map(([address, balance]) => {
       return {address: address, balance: web3.utils.fromWei(balance)}
     })});
@@ -103,7 +103,7 @@ class App extends Component<{}, AppState> {
         <button onClick={this.faucetClick} disabled={this.state.balance > 0}>Request 1 TETH</button>
         <span style={{color: "gray", fontSize: "smaller"}}>(only works for empty accounts)</span>
         <hr />
-        <b>Top 5 Accounts:</b>
+        <b>Top Accounts:</b>
         <br />
         <table className="table is-striped">
         <tbody>
