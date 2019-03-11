@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "parcel index.html",
-    "build": "parcel build index.html"
+    "build": "parcel build --no-minify index.html"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
     "parcel-bundler": "^1.11.0",
+    "parcel-plugin-bundle-visualiser": "^1.2.0",
     "sass": "^1.17.2",
     "typescript": "^3.3.3333",
     "web3": "^1.0.0-beta.48"

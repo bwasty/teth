@@ -3,12 +3,12 @@ import { Component } from 'react'
 import { render } from 'react-dom'
 
 import { Account } from 'web3-eth-accounts';
-import light, { balanceOf$ } from '@parity/light.js';
+// import light, { balanceOf$ } from '@parity/light.js';
 
 import { provider, web3 } from './provider';
 import { WebsocketProvider } from 'web3-providers/types';
 
-light.setProvider(provider);
+// light.setProvider(provider);
 
 interface AppState {
   account: Account,
