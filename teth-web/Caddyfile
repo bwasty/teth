@@ -1,4 +1,13 @@
-teth.malkut.net:80
-root ./dist
-gzip
-log ../../teth-access.log
+teth.malkut.net:443 {
+  root ./dist
+  gzip
+  log ../../teth-access.log
+}
+
+teth.malkut.net:8547 {
+  log ../../teth-access-ws.log
+  proxy / localhost:8546 {
+    transparent
+    websocket
+  }
+}
