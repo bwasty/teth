@@ -225,12 +225,24 @@ impl Rpc for RpcImpl {
                     &self.block_chain,
                     return_transaction_objects,
                 ))
-            }
-            "pending" => Err(Error::internal_error()), // not implemented yet,
-            _ => Err(Error::internal_error()),         // not implemented yet
+            },
+            "pending" => Err(Error::internal_error()), // not implemented yet
+            _ => {
+                // TODO!!: deal with ommers with the same number...
+                let number = u64::from_str_radix(&number[2..], 16)
+                    .map_err(|_| Error::invalid_params("invalid block number"))?;
+                self.block_chain.blocks.values()
+                    .find_map(|block| {
+                        if block.header.number == number {
+                            Some(BlockResponse::new(&block, &self.block_chain,
+                                return_transaction_objects))
+                        } else {
+                            None
+                        }
+                    })
+                    .ok_or_else(|| Error::invalid_params("block not found"))
+            },         
         }
-        // let block = self.block_chain.blocks.values()
-        //     .find(|b| b.number)
     }
 
     fn top_accounts(
@@ -249,7 +261,7 @@ impl Rpc for RpcImpl {
         let limit = limit.unwrap_or(5);
         let offset = offset.unwrap_or(0);
 
-        Ok(balances[offset..offset + limit].to_vec())
+        Ok(balances[offset..(offset + limit).min(balances.len())].to_vec())
     }
 
     fn faucet(&self, address: Address) -> Result<bool> {

@@ -59,9 +59,6 @@ impl WorldState {
         let account = AccountState::new(*ONE_ETHER * 42000u32);
         state.accounts.insert(Address::random(), account);
 
-        let account = AccountState::new(*ONE_ETHER * 420_000u32);
-        state.accounts.insert(Address::random(), account);
-
         state
     }
 }

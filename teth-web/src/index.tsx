@@ -12,7 +12,7 @@ import { WebsocketProvider } from 'web3-providers/types';
 
 interface AppState {
   account: Account,
-  balance: string,
+  balance: number,
   topAccounts: any,
   latestBlocks: any[],
 }
@@ -36,7 +36,7 @@ class App extends Component<{}, AppState> {
 
     this.state = { 
       account, 
-      balance: "0", 
+      balance: null, 
       topAccounts: [],
       latestBlocks: [],
     };
@@ -47,18 +47,18 @@ class App extends Component<{}, AppState> {
     //   console.log(balance)
     //   this.setState({ balance: balance.toString() })
     // })
-    web3.eth.getBalance(account.address)
-      .then((balance) => this.setState({ balance: web3.utils.fromWei(balance)}))
+    this.updateBalance();
 
-    const provider = web3.currentProvider as WebsocketProvider;
-    provider.send('teth_topAccounts', []).then((topAccounts: string[]) => {
-      this.setState({ topAccounts: topAccounts.map(([address, balance]) => {
-        return {address: address, balance: web3.utils.fromWei(balance)}
-      })});
-    })
+    this.updateTopAccounts();
 
     web3.eth.getBlock('latest').then(block => {
       this.setState({latestBlocks: [block]})
+      if (block.number === 0) { return };
+      for (let i = block.number - 1; i >= Math.max(0, block.number - 6); i--) {
+        web3.eth.getBlock(i).then(block => {
+          this.setState({latestBlocks: [...this.state.latestBlocks, block]})
+        });
+      }
     })
 
     // TODO!: HACK for updating connection string...
@@ -74,7 +74,22 @@ class App extends Component<{}, AppState> {
     }
     return <i style={{float: 'right', fontSize: 'smaller', color: 'red'}}>Disconnected</i>
   }
-
+  async updateBalance() {
+    let balance = await web3.eth.getBalance(this.state.account.address)
+    this.setState({ balance: web3.utils.fromWei(balance) as any})
+  }
+  async updateTopAccounts() {
+    const provider = web3.currentProvider as WebsocketProvider;
+    let topAccounts = await provider.send('teth_topAccounts', []) as string[]
+    this.setState({ topAccounts: topAccounts.map(([address, balance]) => {
+      return {address: address, balance: web3.utils.fromWei(balance)}
+    })});
+  }
+  faucetClick = async () => {
+    await web3.eth.currentProvider.send('teth_faucet', [this.state.account.address]);
+    this.updateBalance();
+    this.updateTopAccounts();
+  }
   render() {
     return (
       <div>
@@ -82,20 +97,36 @@ class App extends Component<{}, AppState> {
         <b>Address:</b> {this.state.account.address} 
         <span style={{color: "gray", fontSize: "smaller"}}>(generated in-memory wallet)</span>
         <br />
-        <b>Balance:</b> {this.state.balance} TETH
+        <b>Balance:</b> {this.state.balance} {this.state.balance !== null && 'TETH'}
+        <br />
+        <b>Faucet:</b>
+        <button onClick={this.faucetClick} disabled={this.state.balance > 0}>Request 1 TETH</button>
+        <span style={{color: "gray", fontSize: "smaller"}}>(only works for empty accounts)</span>
         <hr />
         <b>Top 5 Accounts:</b>
         <br />
+        <table className="table is-striped">
+        <tbody>
         {this.state.topAccounts.map(({address, balance}) =>
-          <div key={address}>{address} - {balance} TETH</div>)}
+          <tr key={address}>
+            <td>{address}</td><td align="right">{balance} TETH</td>
+          </tr>)}
+        </tbody>
+        </table>
         <hr />
-        <b>Latest block(s):</b>
+        <b>Latest block:</b>
+        <table className="table is-striped">
+        <tbody>
         {this.state.latestBlocks.map(block => {
           let date = new Date(block.timestamp * 1000)
-          return <div key={block.number}>
-            #{block.number} - {block.transactions.length} transactions - {date.toLocaleDateString()} {date.toLocaleTimeString()}
-          </div>
+          return <tr key={block.number}>
+            <td>#{block.number}</td>
+            <td>{block.transactions ? block.transactions.length : 0} transaction(s)</td>
+            <td>{date.toLocaleDateString()} {date.toLocaleTimeString()}</td>
+          </tr>
         })}
+        </tbody>
+        </table>
         <br />
       </div>
     )
